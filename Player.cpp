@@ -12,6 +12,14 @@ ariel::Player::Player(const std::string player_name) : name(player_name), wood_a
                                                        brick_amount(0), ore_amount(0), total_cards(0),
                                                        victory_points(0), buildings{}, my_id(ID++) {}
 
+ariel::Player::~Player()
+{
+    for (Buildable &b : buildings)
+    {
+        delete &b;
+    }
+}
+
 void ariel::Player::change_victory_points(const short amount)
 {
     if (amount > 2)
@@ -45,8 +53,12 @@ void ariel::Player::add_resource(const MapValues resource, const size_t amount)
     case MapValues::PASTURES:
         this->wool_amount += amount;
         break;
+    case MapValues::SEA:
+        break;
+    case MapValues::DESERT:
+        break;
     default:
-        throw std::invalid_argument("Invalid resource type");
+        throw std::invalid_argument("Invalid resource type");   // Shouldn't be reached.
     }
     this->total_cards += amount;
 }
@@ -70,8 +82,11 @@ const short ariel::Player::get_id() const
     return this->my_id;
 }
 
-void ariel::Player::placeSettelemnt(ariel::Vertex &v, const std::string building)
+void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std::string building)
 {
+    // TODO: Make the board check if this place is valid
+
+
     if (!v.is_free() && v.get_building()->get_owner().get_id() != this->get_id())
     {
         throw std::invalid_argument("This vertex is already taken");
@@ -82,14 +97,21 @@ void ariel::Player::placeSettelemnt(ariel::Vertex &v, const std::string building
         if (v.is_free())
             this->change_victory_points(1);
 
-        ariel::Village village = ariel::Village(*this, v.get_resources());
+        ariel::Village *village = new ariel::Village(*this, v.get_resources());
         v.set_building(village);
-        this->buildings.push_back(village);
+        this->buildings.push_back(*village);
     }
     else if (building.compare("City") == 0)
     {
-        this->buildings.push_back(City(*this, v.get_resources()));
-        this->change_victory_points(2);
+        if (v.is_free())
+            this->change_victory_points(2);
+        else
+        {
+            this->change_victory_points(1);
+        }
+        ariel::City *city = new ariel::City(*this, v.get_resources());
+        v.set_building(city);
+        this->buildings.push_back(*city);
     }
     else
     {

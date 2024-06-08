@@ -4,6 +4,8 @@
 #include "Catan.hpp"
 #include "Buildable.hpp"
 
+using namespace GameConsts;
+
 namespace ariel
 {
     class Player
@@ -23,11 +25,13 @@ namespace ariel
 
     public:
         Player(const std::string player_name);
+        ~Player();
         void change_victory_points(const short amount);
         void add_resource(const MapValues resource, const size_t amount);
         const short get_victory_points() const;
         const int rollDice() const;
-        void placeSettelemnt(Vertex &v, const std::string building);
+        void placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std::string building);
+        void placeRoad();
         const std::string get_name() const;
         const short get_id() const;
     };
