@@ -15,6 +15,9 @@ namespace ariel
         Vertex corners[6];
 
     public:
-        Tile(short id, short token, MapValues v);
+        Tile(short id, short token, MapValues v, Edge e[6], Vertex c[6]);
+        const short get_ID() const;
+        const short get_token() const;
+        const MapValues get_value() const;
     };
 }
