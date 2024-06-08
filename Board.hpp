@@ -24,5 +24,5 @@ namespace ariel
         public:
         Board();
         void initialize_board();
-    }
+    };
 }

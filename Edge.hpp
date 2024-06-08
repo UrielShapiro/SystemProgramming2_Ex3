@@ -11,6 +11,6 @@ namespace ariel
 
     public:
         Edge();
-        void set_road(Player &p);
+        void set_road(const Player &p);
     };
 }
