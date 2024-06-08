@@ -1,7 +1,8 @@
 #include "Vertex.hpp"
 
-ariel::Vertex::Vertex(const MapValues resource[3]) : is_taken(false),
-                                                     resouces{resource[0], resource[1], resource[2]} {}
+ariel::Vertex::Vertex(const MapValues resource1, const MapValues resource2,
+                      const MapValues resource3, const short id) : is_taken(false), ID(id),
+                                                                   resouces{resource1, resource2, resource3} {}
 
 void ariel::Vertex::set_building(ariel::Buildable *b) // Village can be overwritten by city
 {
@@ -17,4 +18,9 @@ const ariel::Buildable *ariel::Vertex::get_building() const
 const bool ariel::Vertex::is_free() const
 {
     return !this->is_taken;
+}
+
+const MapValues *ariel::Vertex::get_resources() const
+{
+    return this->resouces;
 }
