@@ -1,4 +1,5 @@
 #include "Buildable.hpp"
+#include "Catan.hpp"
 
 ariel::Buildable::Buildable(const Player &p, const MapValues *resources_list) : owner(p), resources{*resources_list} {}
 
