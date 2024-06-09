@@ -3,6 +3,7 @@
 #include "Board.hpp"
 
 #define MAX_RESOURCES_PER_BUILDABLE 3
+
 using namespace GameConsts;
 
 namespace ariel
