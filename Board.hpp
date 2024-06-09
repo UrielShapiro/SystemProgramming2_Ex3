@@ -8,7 +8,27 @@
 #define EDGES_PER_TILE 6
 #define VERTICES_PER_TILE 6
 
-
+namespace GameConsts
+{
+    enum ResourceCard
+    {
+        Brick,
+        Wood,
+        Ore,
+        Grain,
+        Wool
+    };
+    enum MapValues
+    {
+        FOREST,
+        HILL,
+        MOUNTAIN,
+        FIELD,
+        PASTURES,
+        SEA,
+        DESERT
+    };
+}
 
 namespace ariel
 {
@@ -24,7 +44,7 @@ namespace ariel
     public:
         Board(Board &b) = delete;               // Singleton should not be cloneable.
         void operator=(const Board &) = delete; // Singleton should not be assignable.
-        static Board *get_instance();
+        static const Board *get_instance();
         ~Board();
     };
 }
