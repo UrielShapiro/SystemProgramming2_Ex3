@@ -10,14 +10,14 @@ namespace ariel
     private:
         short ID;
         short number_token;
-        MapValues value;
-        Edge edges[6];
-        Vertex corners[6];
+        GameConsts::MapValues value;
+        Edge edges[EDGES_PER_TILE];
+        Vertex corners[VERTICES_PER_TILE];
 
     public:
-        Tile(short id, short token, MapValues v, Edge e[6], Vertex c[6]);
+        Tile(short id, short token, GameConsts::MapValues v, Edge e[EDGES_PER_TILE], Vertex c[VERTICES_PER_TILE]);
         const short get_ID() const;
         const short get_token() const;
-        const MapValues get_value() const;
+        const GameConsts::MapValues get_value() const;
     };
 }
