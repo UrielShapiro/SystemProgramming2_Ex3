@@ -1,6 +1,7 @@
 #pragma once
 #include "Player.hpp"
 #include "Tile.hpp"
+#include <algorithm>
 
 #define NUM_OF_TILES 19
 #define NUM_OF_VERTICES 54
@@ -44,7 +45,11 @@ namespace ariel
     public:
         Board(Board &b) = delete;               // Singleton should not be cloneable.
         void operator=(const Board &) = delete; // Singleton should not be assignable.
-        static const Board *get_instance();
+        static Board *get_instance();
+        bool valid_settlement_placement(Vertex &v, Player &p);
+        bool valid_road_placement(Edge &e, Player &p);
+        std::vector<ariel::Tile> get_tiles();
+        std::vector<ariel::Edge> get_edges();
         ~Board();
     };
 }
