@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "Catan.hpp"
 #include "Buildable.hpp"
+#include "Board.hpp"
+#include "Vertex.hpp"
 
 using namespace GameConsts;
 

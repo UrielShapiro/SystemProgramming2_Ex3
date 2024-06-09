@@ -1,9 +1,5 @@
 #include "Player.hpp"
 #include <stdexcept>
-#include "Catan.hpp"
-#include "Board.hpp"
-#include "Buildable.hpp"
-#include "Vertex.hpp"
 #include <ctime>
 
 short ariel::Player::ID = 0;
