@@ -1,31 +1,8 @@
 #pragma once
-#include "Player.hpp"
 #include "Board.hpp"
 
 #define MAX_NUM_OF_PLAYERS 3
 #define POINTS_TO_WIN 10
-
-namespace GameConsts
-{
-    enum ResourceCard
-    {
-        Brick,
-        Wood,
-        Ore,
-        Grain,
-        Wool
-    };
-    enum MapValues
-    {
-        FOREST,
-        HILL,
-        MOUNTAIN,
-        FIELD,
-        PASTURES,
-        SEA,
-        DESERT
-    };
-}
 
 namespace ariel
 {
@@ -33,9 +10,10 @@ namespace ariel
     {
     private:
         Player players[MAX_NUM_OF_PLAYERS];
-        Board &board;
+        const Board *board;
 
     public:
-        Catan();
-    }
+        Catan(ariel::Player &p1, ariel::Player &p2, ariel::Player &p3);
+        void const ChooseStartingPlayer();
+    };
 }
