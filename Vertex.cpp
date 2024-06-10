@@ -24,3 +24,8 @@ const MapValues *ariel::Vertex::get_resources() const
 {
     return this->resouces;
 }
+
+const short ariel::Vertex::get_id() const
+{
+    return this->ID;
+}

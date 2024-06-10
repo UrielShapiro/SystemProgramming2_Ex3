@@ -21,5 +21,6 @@ namespace ariel
         const Buildable *get_building() const;
         const bool is_free() const;
         const MapValues *get_resources() const;
+        const short get_id() const;
     };
 }

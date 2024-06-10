@@ -10,10 +10,11 @@ namespace ariel
     {
     private:
         Player players[MAX_NUM_OF_PLAYERS];
-        const Board *board;
+        Board *board;
 
     public:
         Catan(ariel::Player &p1, ariel::Player &p2, ariel::Player &p3);
-        void const ChooseStartingPlayer();
+        Board* getBoard();
+        void StartingGame();
     };
 }

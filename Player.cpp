@@ -54,7 +54,7 @@ void ariel::Player::add_resource(const MapValues resource, const size_t amount)
     case MapValues::DESERT:
         break;
     default:
-        throw std::invalid_argument("Invalid resource type");   // Shouldn't be reached.
+        throw std::invalid_argument("Invalid resource type"); // Shouldn't be reached.
     }
     this->total_cards += amount;
 }
@@ -80,19 +80,19 @@ const short ariel::Player::get_id() const
 
 void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std::string building)
 {
-    // TODO: Make the board check if this place is valid
-
-
-    if (!v.is_free() && v.get_building()->get_owner().get_id() != this->get_id())
+    if (!b.valid_settlement_placement(v, *this))
     {
         throw std::invalid_argument("This vertex is already taken");
     }
 
     if (building.compare("Village") == 0)
     {
-        if (v.is_free())
-            this->change_victory_points(1);
+        if (!v.is_free())
+        {
+            return;
+        }
 
+        this->change_victory_points(1);
         ariel::Village *village = new ariel::Village(*this, v.get_resources());
         v.set_building(village);
         this->buildings.push_back(*village);
@@ -100,11 +100,14 @@ void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std
     else if (building.compare("City") == 0)
     {
         if (v.is_free())
+        {
             this->change_victory_points(2);
+        }
         else
         {
             this->change_victory_points(1);
         }
+
         ariel::City *city = new ariel::City(*this, v.get_resources());
         v.set_building(city);
         this->buildings.push_back(*city);
@@ -114,3 +117,36 @@ void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std
         throw std::invalid_argument("Invalid building type");
     }
 }
+
+void ariel::Player::placeRoad(ariel::Board &b, ariel::Edge &e)
+{
+    if(!b.valid_road_placement(e, *this))
+    {
+        return;
+    }
+    e.set_road(*this);
+}
+
+void ariel::Player::game_start_placement(ariel::Board &b, size_t edge_placement, unsigned short vertex_placement)
+{
+    if(edge_placement > NUM_OF_EDGES)
+    {
+        throw std::domain_error("Error: you have entered a number above the limit\n");
+    }
+
+    if(b.get_edges().at(edge_placement).isTaken())
+    {
+        std::cerr << "This road is already taken" << std::endl;
+    }
+    b.get_edges().at(edge_placement).set_road(*this);
+
+    for(ariel::Tile &t : b.get_tiles()) // 19 tiles = O(1)
+    {
+        if(std::find(t.get_edges().begin(), t.get_edges().end(), b.get_edges().at(edge_placement)) != t.get_edges().end())
+        {
+            // TODO: Finish this
+        }
+    }
+    
+}
+

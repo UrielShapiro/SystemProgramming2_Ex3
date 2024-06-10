@@ -19,7 +19,7 @@ int main()
     Catan catan(p1, p2, p3);
     // Starting of the game. Every player places two settlements and two roads.
     catan.ChooseStartingPlayer();   // should print the name of the starting player, assume it is Amit.
-    Board board = catan.getBoard(); // get the board of the game.
+    Board* board = catan.getBoard(); // get the board of the game.
     vector<string> places = {"Forest", "Hills"};
     vector<int> placesNum = {5, 6};
     p1.placeSettelemnt(places, placesNum, board);
