@@ -3,6 +3,8 @@
 #include "Board.hpp"
 #include "Buildable.hpp"
 
+#define RESOURCES_PER_TILE 3
+
 using namespace GameConsts;
 
 namespace ariel
@@ -13,7 +15,7 @@ namespace ariel
         Buildable *building;
         const short ID;
         bool is_taken;
-        MapValues resouces[3];
+        MapValues resouces[RESOURCES_PER_TILE];
 
     public:
         Vertex(const MapValues resource1, const MapValues resource2, const MapValues resource3, const short id);

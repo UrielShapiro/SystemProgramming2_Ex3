@@ -78,6 +78,11 @@ const short ariel::Player::get_id() const
     return this->my_id;
 }
 
+size_t good_mod(size_t mod, int base)
+{
+    return ((mod % base) + base) % base;
+}
+
 void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std::string building)
 {
     if (!b.valid_settlement_placement(v, *this))
@@ -120,33 +125,47 @@ void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std
 
 void ariel::Player::placeRoad(ariel::Board &b, ariel::Edge &e)
 {
-    if(!b.valid_road_placement(e, *this))
+    if (!b.valid_road_placement(e, *this))
     {
-        return;
+        throw std::runtime_error("This edge is already taken!");
     }
     e.set_road(*this);
 }
 
-void ariel::Player::game_start_placement(ariel::Board &b, size_t edge_placement, unsigned short vertex_placement)
+void ariel::Player::game_start_placement(ariel::Board &b, size_t edge_placement, size_t vertex_placement)
 {
-    if(edge_placement > NUM_OF_EDGES)
+    if (edge_placement > NUM_OF_EDGES)
     {
         throw std::domain_error("Error: you have entered a number above the limit\n");
     }
 
-    if(b.get_edges().at(edge_placement).isTaken())
+    if (b.get_edges().at(edge_placement).isTaken())
     {
         std::cerr << "This road is already taken" << std::endl;
     }
     b.get_edges().at(edge_placement).set_road(*this);
 
-    for(ariel::Tile &t : b.get_tiles()) // 19 tiles = O(1)
+    for (ariel::Tile &t : b.get_tiles())
     {
-        if(std::find(t.get_edges().begin(), t.get_edges().end(), b.get_edges().at(edge_placement)) != t.get_edges().end())
+        for (size_t i = 0; i < EDGES_PER_TILE; i++)
         {
-            // TODO: Finish this
+            if (t.get_edges().at(i)->get_id() == b.get_edges().at(edge_placement).get_id())
+            {
+                size_t choice = vertex_placement % 2;
+                switch (choice)
+                {
+                case 0:
+                    const GameConsts::MapValues *v_resouces(t.get_vertices().at(i)->get_resources());
+                    t.get_vertices().at(i)->set_building(new ariel::Village(*this, v_resouces));
+                    break;
+                case 1:
+                    const GameConsts::MapValues *v_resouces(t.get_vertices().at(i + 1)->get_resources());
+                    t.get_vertices().at(good_mod(i + 1, VERTICES_PER_TILE))->set_building(new ariel::Village(*this, v_resouces));
+                    break;
+                default:
+                    throw std::runtime_error("An error occured while trying to set a building on a vertex");
+                }
+            }
         }
     }
-    
 }
-

@@ -26,7 +26,6 @@ namespace ariel
     public:
         Village(const Player &p, const MapValues *resources);
         const void get_resources(const size_t amount) override;
-        ~Village();
     };
 
     class City : public Buildable
@@ -34,7 +33,6 @@ namespace ariel
     public:
         City(const Player &p, const MapValues *resources);
         const void get_resources(const size_t amount) override;
-        ~City();
     };
 
 } // namespace ariel

@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "Buildable.hpp"
 #include "Board.hpp"
 #include "Vertex.hpp"
 
@@ -39,7 +38,7 @@ namespace ariel
          *   @param: edge_placement - the id of the edge
          *   @param: vertex_placement - 0 for for one side of the vertex and 1 for the other
         */
-        void game_start_placement(ariel::Board &b, size_t edge_placement, unsigned short vertex_placement);
+        void game_start_placement(ariel::Board &b, size_t edge_placement, size_t vertex_placement);
         const std::string get_name() const;
         const short get_id() const;
     };

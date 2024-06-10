@@ -184,6 +184,12 @@ ariel::Board *ariel::Board::get_instance()
     }
 }
 
+// To avoid reaching over the vector boundries or attempting to reach negative cell in the cell
+size_t good_mod(size_t mod, int base)
+{
+    return ((mod % base) + base) % base;
+}
+
 bool ariel::Board::valid_settlement_placement(Vertex &v, Player &p)
 {
     if (!v.is_free()) // If the place is not free, check if the owner is the same.
@@ -198,57 +204,32 @@ bool ariel::Board::valid_settlement_placement(Vertex &v, Player &p)
         {
             for (size_t i = 0; i < VERTICES_PER_TILE; i++)
             {
-                if (t.get_vertices().at(i).get_id() == v.get_id())
+                if (t.get_vertices().at(i)->get_id() == v.get_id())
                 {
 
                     // Check if it's neighbour vertex has a village/city of other player
-                    try
+                    if (!t.get_vertices().at(good_mod(i + 1, VERTICES_PER_TILE))->is_free() &&
+                        t.get_vertices().at(good_mod(i + 1, VERTICES_PER_TILE))->get_building()->get_owner().get_id() != p.get_id())
                     {
-                        if (!t.get_vertices().at(i + 1).is_free() && t.get_vertices().at(i + 1).get_building()->get_owner().get_id() != p.get_id())
-                        {
-                            return false;
-                        }
+                        return false;
                     }
-                    catch (const std::exception &e)
+
+                    if (!t.get_vertices().at(good_mod(i - 1, VERTICES_PER_TILE))->is_free() &&
+                        t.get_vertices().at(good_mod(i - 1, VERTICES_PER_TILE))->get_building()->get_owner().get_id() != p.get_id())
                     {
-                        if (!t.get_vertices().at(0).is_free() && t.get_vertices().at(0).get_building()->get_owner().get_id() != p.get_id())
-                        {
-                            return false;
-                        }
-                    }
-                    try
-                    {
-                        if (!t.get_vertices().at(i - 1).is_free() && t.get_vertices().at(i - 1).get_building()->get_owner().get_id() != p.get_id())
-                        {
-                            return false;
-                        }
-                    }
-                    catch (const std::exception &e)
-                    {
-                        if (!t.get_vertices().at(VERTICES_PER_TILE).is_free() && t.get_vertices().at(VERTICES_PER_TILE).get_building()->get_owner().get_id() != p.get_id())
-                        {
-                            return false;
-                        }
+                        return false;
                     }
 
                     // Check if theres a road to that vertex
-                    if (t.get_edges().at(i).isTaken() && t.get_edges().at(i).get_owner()->get_id() == p.get_id())
+                    if (t.get_edges().at(i)->isTaken() && t.get_edges().at(i)->get_owner()->get_id() == p.get_id())
                     {
                         return true;
                     }
-                    try
+
+                    if (t.get_edges().at(good_mod(i - 1, EDGES_PER_TILE))->isTaken() &&
+                        t.get_edges().at(good_mod(i - 1, EDGES_PER_TILE))->get_owner()->get_id() == p.get_id())
                     {
-                        if (t.get_edges().at(i - 1).isTaken() && t.get_edges().at(i - 1).get_owner()->get_id() == p.get_id())
-                        {
-                            return true;
-                        }
-                    }
-                    catch (const std::exception &e)
-                    {
-                        if (t.get_edges().at(EDGES_PER_TILE).isTaken() && t.get_edges().at(EDGES_PER_TILE).get_owner()->get_id() == p.get_id())
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -272,65 +253,34 @@ bool ariel::Board::valid_road_placement(Edge &e, Player &p)
         {
             for (size_t i = 0; i < EDGES_PER_TILE; i++)
             {
-                if (t.get_edges().at(i).get_id() == e.get_id())
+                if (t.get_edges().at(i)->get_id() == e.get_id())
                 {
-                    try
+                    // Check the edge adjecent edges
+                    if (t.get_edges().at(good_mod(i - 1, EDGES_PER_TILE))->get_owner() == nullptr) // If this place has no road yet
                     {
-                        if (t.get_edges().at(i - 1).get_owner() == nullptr) // If this place has no road yet
-                        {
-                            continue;
-                        }
-                        if (!t.get_edges().at(i - 1).get_owner()->get_id() == p.get_id()) // i - 1 might be a nagative number
-                            valid1 = true;
+                        continue;
                     }
-                    catch (const std::exception &e)
-                    {
-                        if (t.get_edges().at(EDGES_PER_TILE).get_owner() == nullptr) // If this place has no road yet
-                        {
-                            continue;
-                        }
-                        if (!t.get_edges().at(EDGES_PER_TILE).get_owner()->get_id() == p.get_id())
-                            valid1 = true;
-                    }
+                    if (!t.get_edges().at(good_mod(i - 1, EDGES_PER_TILE))->get_owner()->get_id() == p.get_id()) // i - 1 might be a nagative number
+                        valid1 = true;
 
-                    try
+                    if (t.get_edges().at(good_mod(i + 1, EDGES_PER_TILE))->get_owner() == nullptr) // If this place has no road yet
                     {
-                        if (t.get_edges().at(i + 1).get_owner() == nullptr) // If this place has no road yet
-                        {
-                            continue;
-                        }
-                        if (!t.get_edges().at(i + 1).get_owner()->get_id() == p.get_id()) // i + 1 might be > EDGES_PER_TILE
-                            valid2 = true;
+                        continue;
                     }
-                    catch (const std::exception &e)
-                    {
-                        if (t.get_edges().at(0).get_owner() == nullptr) // If this place has no road yet
-                        {
-                            continue;
-                        }
-                        if (!t.get_edges().at(0).get_owner()->get_id() == p.get_id())
-                            valid2 = true;
-                    }
+                    if (!t.get_edges().at(good_mod(i + 1, EDGES_PER_TILE))->get_owner()->get_id() == p.get_id()) // i + 1 might be > EDGES_PER_TILE
+                        valid2 = true;
 
                     // Checking if theres an adjecent village / city
-                    if (!t.get_vertices().at(i).is_free())
+                    if (!t.get_vertices().at(i)->is_free())
                     {
-                        has_village = t.get_vertices().at(i).get_building()->get_owner().get_id() == p.get_id();
+                        has_village = t.get_vertices().at(i)->get_building()->get_owner().get_id() == p.get_id();
                     }
-                    try
+
+                    if (!t.get_vertices().at(good_mod(i + 1, VERTICES_PER_TILE))->is_free())
                     {
-                        if (!t.get_vertices().at(i + 1).is_free())
-                        {
-                            has_village = t.get_vertices().at(i).get_building()->get_owner().get_id() == p.get_id();
-                        }
+                        has_village = t.get_vertices().at(i)->get_building()->get_owner().get_id() == p.get_id();
                     }
-                    catch (const std::exception &e)
-                    {
-                        if (!t.get_vertices().at(0).is_free())
-                        {
-                            has_village = t.get_vertices().at(i).get_building()->get_owner().get_id() == p.get_id();
-                        }
-                    }
+
                     break;
                 }
                 if (valid1 || valid2 || has_village)
