@@ -29,6 +29,14 @@ namespace GameConsts
         SEA,
         DESERT
     };
+    enum DevelopmentCard
+    {
+        KNIGHT,
+        MONOPOLY,
+        BUILD_ROAD,
+        YEAR_OF_PLENTY,
+        WINNING_POINTS
+    };
 }
 
 namespace ariel
@@ -36,9 +44,9 @@ namespace ariel
     class Board
     {
     private:
-        std::vector<ariel::Tile> tiles;
-        std::vector<ariel::Edge> edges;
-        std::vector<ariel::Vertex> vertices;
+        std::vector<ariel::Tile*> tiles;
+        std::vector<ariel::Edge*> edges;
+        std::vector<ariel::Vertex*> vertices;
         static Board *instance;
         Board();
 
@@ -48,8 +56,8 @@ namespace ariel
         static Board *get_instance();
         bool valid_settlement_placement(Vertex &v, Player &p);
         bool valid_road_placement(Edge &e, Player &p);
-        std::vector<ariel::Tile> get_tiles();
-        std::vector<ariel::Edge> get_edges();
+        std::vector<ariel::Tile*> get_tiles();
+        std::vector<ariel::Edge*> get_edges();
         ~Board();
     };
 }

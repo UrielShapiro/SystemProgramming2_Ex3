@@ -20,9 +20,10 @@ namespace ariel
     public:
         Vertex(const MapValues resource1, const MapValues resource2, const MapValues resource3, const short id);
         void set_building(ariel::Buildable *b);
-        const Buildable *get_building() const;
+        Buildable *get_building();
         const bool is_free() const;
         const MapValues *get_resources() const;
         const short get_id() const;
+        ~Vertex();
     };
 }
