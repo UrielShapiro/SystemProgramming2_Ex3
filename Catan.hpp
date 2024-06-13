@@ -1,5 +1,6 @@
 #pragma once
 #include "Board.hpp"
+#include "GameConsts.hpp"
 
 #define MAX_NUM_OF_PLAYERS 3
 #define POINTS_TO_WIN 10
@@ -10,14 +11,14 @@ namespace ariel
     class Catan
     {
     private:
-        Player players[MAX_NUM_OF_PLAYERS];
-        Board *board;
-        size_t turn;
         size_t largest_army;
+        size_t turn;
+        Board *board;
+        Player players[MAX_NUM_OF_PLAYERS];
 
     public:
         Catan(ariel::Player &p1, ariel::Player &p2, ariel::Player &p3);
-        Board* getBoard();
+        Board *getBoard();
         void StartingGame(std::vector<size_t> &e_placement, std::vector<size_t> &v_placement);
         void rollDice();
         bool check_winner();

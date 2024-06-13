@@ -4,13 +4,13 @@
 
 short ariel::Player::ID = 0;
 
-ariel::Player::Player(const std::string player_name) : name(player_name), wood_amount(0), grain_amount(0),
-                                                       brick_amount(0), ore_amount(0), total_cards(0),
-                                                       victory_points(0), buildings{}, my_id(ID++), development_cards{}, largest_army(false) {}
+ariel::Player::Player(const std::string player_name) : my_id(ID++), name(player_name), wood_amount(0),
+                                                       brick_amount(0), ore_amount(0), grain_amount(0), wool_amount(0), total_cards(0),
+                                                       victory_points(0), buildings{}, development_cards{}, largest_army(false) {}
 
 ariel::Player::~Player()
 {
-    for (Buildable &b : buildings)
+    for (auto &b : buildings)
     {
         delete &b;
     }
@@ -25,7 +25,7 @@ void ariel::Player::change_victory_points(const short amount)
     this->victory_points += amount;
 }
 
-const short ariel::Player::get_victory_points() const
+short ariel::Player::get_victory_points() const
 {
     return this->victory_points;
 }
@@ -34,24 +34,24 @@ void ariel::Player::change_resource_amount(const GameConsts::MapValues resource,
 {
     switch (resource)
     {
-    case MapValues::FOREST:
+    case GameConsts::MapValues::FOREST:
         this->wood_amount += amount;
         break;
-    case MapValues::HILL:
+    case GameConsts::MapValues::HILL:
         this->brick_amount += amount;
         break;
-    case MapValues::MOUNTAIN:
+    case GameConsts::MapValues::MOUNTAIN:
         this->ore_amount += amount;
         break;
-    case MapValues::FIELD:
+    case GameConsts::MapValues::FIELD:
         this->grain_amount += amount;
         break;
-    case MapValues::PASTURES:
+    case GameConsts::MapValues::PASTURES:
         this->wool_amount += amount;
         break;
-    case MapValues::SEA:
+    case GameConsts::MapValues::SEA:
         break;
-    case MapValues::DESERT:
+    case GameConsts::MapValues::DESERT:
         break;
     default:
         throw std::invalid_argument("Invalid resource type"); // Shouldn't be reached.
@@ -84,7 +84,7 @@ void ariel::Player::change_resource_amount(const GameConsts::ResourceCard resour
     this->total_cards += amount;
 }
 
-const int ariel::Player::rollDice() const
+int ariel::Player::rollDice() const
 {
     srand(time(NULL));
     int dice1 = ((rand() % 6) + 1);
@@ -98,14 +98,9 @@ const std::string ariel::Player::get_name() const
     return this->name;
 }
 
-const short ariel::Player::get_id() const
+short ariel::Player::get_id() const
 {
     return this->my_id;
-}
-
-size_t good_mod(size_t mod, int base)
-{
-    return ((mod % base) + base) % base;
 }
 
 void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std::string building)
@@ -129,7 +124,7 @@ void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std
         this->change_victory_points(1);
         ariel::Village *village = new ariel::Village(*this, v.get_resources());
         v.set_building(village);
-        this->buildings.push_back(*village);
+        this->buildings.push_back(village);
     }
     else if (building.compare("City") == 0)
     {
@@ -145,7 +140,7 @@ void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std
         this->change_victory_points(1);
         ariel::City *city = new ariel::City(*this, v.get_resources());
         v.set_building(city);
-        this->buildings.push_back(*city);
+        this->buildings.push_back(city);
     }
     else
     {
@@ -188,12 +183,18 @@ void ariel::Player::game_start_placement(ariel::Board &b, size_t edge_placement,
                 switch (choice)
                 {
                 case 0:
+                {   // Open perentheses to use v_resources again in the next case
                     const GameConsts::MapValues *v_resouces(tile->get_vertices().at(i)->get_resources());
-                    tile->get_vertices().at(i)->set_building(new ariel::Village(*this, v_resouces));
+                    this->buildings.push_back(new ariel::Village(*this, v_resouces));
+                    tile->get_vertices().at(i)->set_building(this->buildings.back());
+                }
                     break;
                 case 1:
+                {
                     const GameConsts::MapValues *v_resouces(tile->get_vertices().at(i + 1)->get_resources());
-                    tile->get_vertices().at(good_mod(i + 1, VERTICES_PER_TILE))->set_building(new ariel::Village(*this, v_resouces));
+                    this->buildings.push_back(new ariel::Village(*this, v_resouces));
+                    tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->set_building(this->buildings.back());
+                }
                     break;
                 default:
                     throw std::runtime_error("An error occured while trying to set a building on a vertex");
@@ -203,7 +204,7 @@ void ariel::Player::game_start_placement(ariel::Board &b, size_t edge_placement,
     }
 }
 
-const bool ariel::Player::check_valid_resources(GameConsts::ResourceCard card, size_t amount) const
+bool ariel::Player::check_valid_resources(GameConsts::ResourceCard card, int amount) const
 {
     if (amount < 0)
     {
@@ -211,18 +212,18 @@ const bool ariel::Player::check_valid_resources(GameConsts::ResourceCard card, s
     }
     switch (card)
     {
-    case GameConsts::Ore:
+    case GameConsts::ResourceCard::Ore:
         return ore_amount - amount >= 0;
         break;
-    case GameConsts::Brick:
+    case GameConsts::ResourceCard::Brick:
         return brick_amount - amount >= 0;
         break;
-    case GameConsts::Grain:
+    case GameConsts::ResourceCard::Grain:
         return grain_amount - amount >= 0;
         break;
-    case GameConsts::Wood:
+    case GameConsts::ResourceCard::Wood:
         return wood_amount - amount >= 0;
-    case GameConsts::Wool:
+    case GameConsts::ResourceCard::Wool:
         return wool_amount - amount >= 0;
     default:
         throw std::runtime_error("Error: resource card is not valid"); // Would never reach here
@@ -254,5 +255,6 @@ void ariel::Player::set_largest_army(bool is_the_largest)
 template <typename T>
 bool ariel::Player::trade(ariel::Player &p, std::vector<T> &vec)
 {
+    return true;
     // TODO: Complete the function.
 }

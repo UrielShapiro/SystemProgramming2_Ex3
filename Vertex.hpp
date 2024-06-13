@@ -2,28 +2,28 @@
 
 #include "Board.hpp"
 #include "Buildable.hpp"
+#include "GameConsts.hpp"
 
 #define RESOURCES_PER_TILE 3
 
-using namespace GameConsts;
-
 namespace ariel
 {
+    class Buildable;
     class Vertex
     {
     private:
         Buildable *building;
         const short ID;
         bool is_taken;
-        MapValues resouces[RESOURCES_PER_TILE];
+        GameConsts::MapValues resouces[RESOURCES_PER_TILE];
 
     public:
-        Vertex(const MapValues resource1, const MapValues resource2, const MapValues resource3, const short id);
+        Vertex(const GameConsts::MapValues resource1, const GameConsts::MapValues resource2, const GameConsts::MapValues resource3, const short id);
         void set_building(ariel::Buildable *b);
         Buildable *get_building();
-        const bool is_free() const;
-        const MapValues *get_resources() const;
-        const short get_id() const;
-        ~Vertex();
+        bool is_free() const;
+        const GameConsts::MapValues *get_resources() const;
+        short get_id() const;
+        ~Vertex() =default;
     };
 }

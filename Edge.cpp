@@ -1,6 +1,6 @@
 #include "Edge.hpp"
 
-ariel::Edge::Edge(const short id) : is_taken(false), road_owner(NULL), ID(id) {}
+ariel::Edge::Edge(const short id) : road_owner(NULL), is_taken(false), ID(id) {}
 
 void ariel::Edge::set_road(Player &p)
 {
@@ -8,19 +8,19 @@ void ariel::Edge::set_road(Player &p)
     this->is_taken = true;
 }
 
-bool const ariel::Edge::isTaken() const
+bool ariel::Edge::isTaken() const
 {
     return this->is_taken;
 }
 
-const short ariel::Edge::get_id() const
+short ariel::Edge::get_id() const
 {
     return this->ID;
 }
 
 const ariel::Player *ariel::Edge::get_owner() const
 {
-    if(!this->is_taken)
+    if (!this->is_taken)
     {
         return nullptr;
     }

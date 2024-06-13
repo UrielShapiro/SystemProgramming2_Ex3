@@ -1,38 +1,51 @@
 #include "Buildable.hpp"
 #include "Catan.hpp"
 
-ariel::Buildable::Buildable(const Player &p, const MapValues *resources_list) : owner(p), resources{*resources_list} {}
-
-const MapValues *ariel::Buildable::get_resources() const
+ariel::Buildable::Buildable(Player &p, const GameConsts::MapValues resources_list[MAX_RESOURCES_PER_BUILDABLE]) : owner(p)
 {
-    return this->resources;
+    for (size_t i = 0; i < MAX_RESOURCES_PER_BUILDABLE; i++)
+    {
+        resources[i] = resources_list[i];
+    }
+}
+ariel::Buildable::Buildable(const Buildable &other) : owner(other.owner)
+{
+    for (size_t i = 0; i < MAX_RESOURCES_PER_BUILDABLE; i++)
+    {
+        resources[i] = other.resources[i];
+    }
+}
+
+const GameConsts::MapValues *ariel::Buildable::get_resources() const
+{
+    return resources;
 }
 
 ariel::Player &ariel::Buildable::get_owner()
 {
-    return this->owner;
+    return owner;
 }
 
-ariel::Village::Village(const Player &p, const MapValues *resources_list) : Buildable(p, resources_list) {}
+ariel::Village::Village(Player &p, const GameConsts::MapValues resources_list[MAX_RESOURCES_PER_BUILDABLE]) : Buildable(p, resources_list) {}
 
-const void ariel::Village::get_resources(size_t amount)
+void ariel::Village::get_resources(size_t amount)
 {
-    for (MapValues &resource : this->resources)
+    for (GameConsts::MapValues &resource : this->resources)
     {
         this->owner.change_resource_amount(resource, amount);
     }
 }
 
-const std::string ariel::Village::get_type() { return "Village"; }
+std::string ariel::Village::get_type() const { return "Village"; }
 
-ariel::City::City(const Player &p, const MapValues *resources_list) : Buildable(p, resources_list) {}
+ariel::City::City(Player &p, const GameConsts::MapValues resources_list[MAX_RESOURCES_PER_BUILDABLE]) : Buildable(p, resources_list) {}
 
-const void ariel::City::get_resources(size_t amount)
+void ariel::City::get_resources(size_t amount)
 {
-    for (MapValues &resource : this->resources)
+    for (GameConsts::MapValues &resource : this->resources)
     {
-        this->owner.change_resource_amount(resource, amount);
+        this->owner.change_resource_amount(resource, 2 * amount);
     }
 }
 
-const std::string ariel::City::get_type() { return "City"; }
+std::string ariel::City::get_type() const { return "City"; }

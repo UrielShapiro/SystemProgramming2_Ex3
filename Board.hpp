@@ -1,7 +1,7 @@
 #pragma once
 #include "Player.hpp"
 #include "Tile.hpp"
-#include <algorithm>
+#include "GameConsts.hpp"
 
 #define NUM_OF_TILES 19
 #define NUM_OF_VERTICES 54
@@ -9,38 +9,10 @@
 #define EDGES_PER_TILE 6
 #define VERTICES_PER_TILE 6
 
-namespace GameConsts
-{
-    enum ResourceCard
-    {
-        Brick,
-        Wood,
-        Ore,
-        Grain,
-        Wool
-    };
-    enum MapValues
-    {
-        FOREST,
-        HILL,
-        MOUNTAIN,
-        FIELD,
-        PASTURES,
-        SEA,
-        DESERT
-    };
-    enum DevelopmentCard
-    {
-        KNIGHT,
-        MONOPOLY,
-        BUILD_ROAD,
-        YEAR_OF_PLENTY,
-        WINNING_POINTS
-    };
-}
-
 namespace ariel
 {
+    class Player;   // Forward declaration
+    class Tile;     // Forward declaration
     class Board
     {
     private:

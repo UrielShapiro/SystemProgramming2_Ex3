@@ -1,39 +1,44 @@
 #pragma once
 #include "Player.hpp"
 #include "Board.hpp"
+#include "GameConsts.hpp"
 
 #define MAX_RESOURCES_PER_BUILDABLE 3
 
 namespace ariel
 {
+    class Player; // Forward declaration
+
     class Buildable
     {
     protected:
-        Player owner;
+        Player &owner;
         GameConsts::MapValues resources[MAX_RESOURCES_PER_BUILDABLE];
-        Buildable(const Player &p, const GameConsts::MapValues *resources_list);
+        Buildable(Player &p, const GameConsts::MapValues resources_list[MAX_RESOURCES_PER_BUILDABLE]);
 
     public:
-        virtual const void get_resources(const size_t amount) = 0;
-        virtual const std::string get_type() = 0;
+        Buildable(const Buildable &other);
+        virtual void get_resources(const size_t amount) = 0;
+        virtual std::string get_type() const = 0;
         const GameConsts::MapValues *get_resources() const;
         Player &get_owner();
+        virtual ~Buildable() = default;
     };
 
     class Village : public Buildable
     {
     public:
-        Village(const Player &p, const GameConsts::MapValues *resources);
-        const void get_resources(const size_t amount) override;
-        const std::string get_type() override;
+        Village(Player &p, const GameConsts::MapValues resources_list[MAX_RESOURCES_PER_BUILDABLE]);
+        void get_resources(const size_t amount) override;
+        std::string get_type() const override;
     };
 
     class City : public Buildable
     {
     public:
-        City(const Player &p, const GameConsts::MapValues *resources);
-        const void get_resources(const size_t amount) override;
-        const std::string get_type() override;
+        City(Player &p, const GameConsts::MapValues resources_list[MAX_RESOURCES_PER_BUILDABLE]);
+        void get_resources(const size_t amount) override;
+        std::string get_type() const override;
     };
 
-} // namespace ariel
+};

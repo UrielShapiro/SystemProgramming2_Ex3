@@ -1,8 +1,8 @@
 #include "Catan.hpp"
 #include <time.h>
 
-ariel::Catan::Catan(ariel::Player &p1, ariel::Player &p2, ariel::Player &p3) : players{p1, p2, p3}, turn(0), largest_army(INITIATE_LARGEST_ARMY),
-                                                                               board(ariel::Board::get_instance()) {}
+ariel::Catan::Catan(ariel::Player &p1, ariel::Player &p2, ariel::Player &p3) : largest_army(INITIATE_LARGEST_ARMY), turn(0),
+                                                                               board(ariel::Board::get_instance()), players{p1, p2, p3} {}
 
 ariel::Board *ariel::Catan::getBoard() { return this->board; }
 
@@ -29,9 +29,11 @@ void ariel::Catan::rollDice()
             {
                 if (!v->is_free())
                 {
+                    v->get_building()->get_resources(1);
+
                     size_t amount = v->get_building()->get_type() == "Village" ? 1 : 2;
-                    v->get_building()->get_owner().change_resource_amount(t->get_value(), amount);
-                    std::cout << "Awarded " << amount << " of " << t->get_value() << " to "
+                    // v->get_building()->get_owner().change_resource_amount(t->get_value(), amount);
+                    std::cout << "Awarded " << amount << " of " << GameConsts::to_string(t->get_value()) << " cards to "
                               << v->get_building()->get_owner().get_name() << std::endl;
                 }
             }
@@ -41,13 +43,14 @@ void ariel::Catan::rollDice()
 
 GameConsts::DevelopmentCard ariel::Catan::buyDevelopmentCard(ariel::Player &p)
 {
-    if (!(p.check_valid_resources(GameConsts::Ore, 1) && p.check_valid_resources(GameConsts::Wool, 1) && p.check_valid_resources(GameConsts::Grain, 1)))
+    if (!(p.check_valid_resources(GameConsts::ResourceCard::Ore, 1) && p.check_valid_resources(GameConsts::ResourceCard::Wool, 1) && p.check_valid_resources(GameConsts::ResourceCard::Grain, 1)))
     {
-        return;
+        throw std::runtime_error("Error: Not enough resources to buy a development card");
     }
-    p.change_resource_amount(GameConsts::Ore, -1);
-    p.change_resource_amount(GameConsts::Wool, -1);
-    p.change_resource_amount(GameConsts::Grain, -1);
+    // Otherwise: remove the resources and add a random card to the player
+    p.change_resource_amount(GameConsts::ResourceCard::Ore, -1);
+    p.change_resource_amount(GameConsts::ResourceCard::Wool, -1);
+    p.change_resource_amount(GameConsts::ResourceCard::Grain, -1);
 
     std::vector<GameConsts::DevelopmentCard> cards = {GameConsts::DevelopmentCard::BUILD_ROAD,
                                                       GameConsts::DevelopmentCard::KNIGHT,
@@ -63,17 +66,18 @@ void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::Developmen
     // First, remove the card from the users vector of development cards, unless its a knight.
     if (card != GameConsts::DevelopmentCard::KNIGHT)
     {
-
-        auto placement = std::find(p.get_development_cards().begin(), p.get_development_cards().end(), card);
-        try
+        bool found = false;
+        for (size_t i = 0 ; i < p.get_development_cards().size() && !found; i++)
         {
-            p.get_development_cards().erase(placement);
+            if(to_string(p.get_development_cards().at(i)) == to_string(card))
+            {
+                p.get_development_cards().erase(p.get_development_cards().begin() + i);
+                found = true;
+            }
         }
-        catch (const std::exception &e)
+        if(!found)
         {
-            std::cerr << "Error: requested card is not in the cards vector\n"
-                      << e.what() << '\n';
-            return;
+            throw std::runtime_error("Error: requested card is not in the cards vector");
         }
     }
 
