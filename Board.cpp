@@ -179,7 +179,7 @@ ariel::Board::~Board()
         {
             delete v;
         }
-        
+
         for (ariel::Edge *e : edges)
         {
             delete e;
@@ -188,8 +188,8 @@ ariel::Board::~Board()
         {
             delete tile;
         }
-        instance = nullptr;
     }
+    instance = nullptr;
 }
 
 ariel::Board *ariel::Board::get_instance()
@@ -200,8 +200,6 @@ ariel::Board *ariel::Board::get_instance()
     }
     return instance;
 }
-
-
 
 bool ariel::Board::valid_settlement_placement(Vertex &v, Player &p)
 {

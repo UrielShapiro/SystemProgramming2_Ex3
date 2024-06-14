@@ -13,6 +13,7 @@ namespace ariel
 {
     class Player;   // Forward declaration
     class Tile;     // Forward declaration
+
     class Board
     {
     private:
