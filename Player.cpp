@@ -10,9 +10,9 @@ ariel::Player::Player(const std::string player_name) : my_id(ID++), name(player_
 
 ariel::Player::~Player()
 {
-    for (auto &b : buildings)
+    for (ariel::Buildable *b : buildings)
     {
-        delete &b;
+        delete b;
     }
 }
 
@@ -169,9 +169,11 @@ void ariel::Player::game_start_placement(ariel::Board &b, size_t edge_placement,
     }
     if (b.get_edges().at(edge_placement)->isTaken())
     {
-        std::cerr << "This road is already taken" << std::endl;
+        std::string error = "Error:" + std::to_string(b.get_edges().at(edge_placement)->get_id()) + " is already taken\n";
+        throw std::runtime_error(error.c_str());
     }
     b.get_edges().at(edge_placement)->set_road(*this);
+    std::cout << this->name << " has set an edge on: " << edge_placement << std::endl;
 
     for (ariel::Tile *tile : b.get_tiles())
     {
@@ -179,29 +181,32 @@ void ariel::Player::game_start_placement(ariel::Board &b, size_t edge_placement,
         {
             if (tile->get_edges().at(i)->get_id() == b.get_edges().at(edge_placement)->get_id())
             {
-                size_t choice = vertex_placement % 2;
+                size_t choice = vertex_placement % 2;   // To make it sort of boolean
                 switch (choice)
                 {
                 case 0:
-                {   // Open perentheses to use v_resources again in the next case
+                { // Open perentheses to use v_resources again in the next case
                     const GameConsts::MapValues *v_resouces(tile->get_vertices().at(i)->get_resources());
                     this->buildings.push_back(new ariel::Village(*this, v_resouces));
                     tile->get_vertices().at(i)->set_building(this->buildings.back());
+                    std::cout << this->name << " has set a village on vertex: " << tile->get_vertices().at(i)->get_id() << std::endl;
                 }
-                    break;
+                break;
                 case 1:
                 {
                     const GameConsts::MapValues *v_resouces(tile->get_vertices().at(i + 1)->get_resources());
                     this->buildings.push_back(new ariel::Village(*this, v_resouces));
                     tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->set_building(this->buildings.back());
+                    std::cout << this->name << " has set a village on vertex: " << tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->get_id() << std::endl;
                 }
-                    break;
+                break;
                 default:
                     throw std::runtime_error("An error occured while trying to set a building on a vertex");
                 }
             }
         }
     }
+    this->change_victory_points(1); // Awarding a victory point for the first settlement
 }
 
 bool ariel::Player::check_valid_resources(GameConsts::ResourceCard card, int amount) const
@@ -255,6 +260,45 @@ void ariel::Player::set_largest_army(bool is_the_largest)
 template <typename T>
 bool ariel::Player::trade(ariel::Player &p, std::vector<T> &vec)
 {
-    return true;
-    // TODO: Complete the function.
+    bool traded = false;
+    for (T &item : vec)
+    {
+        if (std::is_same<decltype(item), GameConsts::ResourceCard>::value)  // Check if the type of the item is resource card
+        {
+            if (!(this->check_valid_resources(item, 1)))
+            {
+                std::cout << this->get_name() << " does not have " << typeid(item).name() << std::endl;
+                continue;
+            }
+            else
+            {
+                this->change_resource_amount(item, -1);
+                p.change_resource_amount(item, 1);
+                traded = true;
+            }
+        }
+        else if (std::is_same<decltype(item), GameConsts::DevelopmentCard>::value)
+        {
+            if (this->development_cards.size() == 0)
+            {
+                std::cerr << "Error while trading cards: " << this->get_name() << " does not have any development cards" << std::endl;
+                continue;
+            }
+            for (size_t i = 0; i < this->development_cards.size(); i++)
+            {
+                if (to_string(this->development_cards.at(i)) == to_string(item))
+                {
+                    this->development_cards.erase(this->development_cards.begin() + i);
+                    p.get_development_cards().push_back(item);
+                    traded = true;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            throw std::runtime_error("Error: invalid type of trade");
+        }
+    }
+    return traded;
 }
