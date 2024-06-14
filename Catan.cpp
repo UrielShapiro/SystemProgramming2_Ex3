@@ -1,8 +1,13 @@
 #include "Catan.hpp"
 #include <time.h>
+#include <iostream>
+#include <stdexcept>
 
 ariel::Catan::Catan(ariel::Player &p1, ariel::Player &p2, ariel::Player &p3) : largest_army(INITIATE_LARGEST_ARMY), turn(0),
-                                                                               board(ariel::Board::get_instance()), players{p1, p2, p3} {}
+                                                                               board(ariel::Board::get_instance()), players{p1, p2, p3} {
+                                                                                std::cout << "Catan game has started" << std::endl;
+                                                                                std::cout << "Starting player is: " << players[turn].get_name() << std::endl;
+                                                                               }
 
 ariel::Board *ariel::Catan::getBoard() { return this->board; }
 
@@ -20,7 +25,8 @@ void ariel::Catan::StartingGame(std::vector<size_t> &e_placement, std::vector<si
 
 void ariel::Catan::rollDice()
 {
-    int dice_result = players[turn++ % MAX_NUM_OF_PLAYERS].rollDice();
+    int dice_result = players[turn].rollDice();
+    std::cout << "The dice result is: " << dice_result << std::endl;
     for (ariel::Tile *t : board->get_tiles())
     {
         if (t->get_token() == dice_result)
@@ -43,6 +49,11 @@ void ariel::Catan::rollDice()
 
 GameConsts::DevelopmentCard ariel::Catan::buyDevelopmentCard(ariel::Player &p)
 {
+    if (players[turn].get_id() != p.get_id())
+    {
+        throw std::runtime_error("Error: It is not your turn");
+    }
+
     if (!(p.check_valid_resources(GameConsts::ResourceCard::Ore, 1) && p.check_valid_resources(GameConsts::ResourceCard::Wool, 1) && p.check_valid_resources(GameConsts::ResourceCard::Grain, 1)))
     {
         throw std::runtime_error("Error: Not enough resources to buy a development card");
@@ -63,19 +74,23 @@ GameConsts::DevelopmentCard ariel::Catan::buyDevelopmentCard(ariel::Player &p)
 
 void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::DevelopmentCard card)
 {
+    if (players[turn].get_id() != p.get_id())
+    {
+        throw std::runtime_error("Error: It is not your turn");
+    }
     // First, remove the card from the users vector of development cards, unless its a knight.
     if (card != GameConsts::DevelopmentCard::KNIGHT)
     {
         bool found = false;
-        for (size_t i = 0 ; i < p.get_development_cards().size() && !found; i++)
+        for (size_t i = 0; i < p.get_development_cards().size() && !found; i++)
         {
-            if(to_string(p.get_development_cards().at(i)) == to_string(card))
+            if (to_string(p.get_development_cards().at(i)) == to_string(card))
             {
                 p.get_development_cards().erase(p.get_development_cards().begin() + i);
                 found = true;
             }
         }
-        if(!found)
+        if (!found)
         {
             throw std::runtime_error("Error: requested card is not in the cards vector");
         }
@@ -255,6 +270,12 @@ bool ariel::Catan::check_largest_army()
     return updated;
 }
 
+ariel::Catan::~Catan()
+{
+    delete board;
+    // Not deleting players because they are not dynamically allocated
+}
+
 void ariel::Catan::GameCheck()
 {
     if (ariel::Catan::check_winner())
@@ -269,4 +290,6 @@ void ariel::Catan::GameCheck()
         }
     }
     check_largest_army();
+    ++turn;
+    turn = turn % MAX_NUM_OF_PLAYERS; // Move to the next player
 }

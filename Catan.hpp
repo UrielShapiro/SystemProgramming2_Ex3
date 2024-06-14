@@ -26,5 +26,6 @@ namespace ariel
         GameConsts::DevelopmentCard buyDevelopmentCard(Player &p);
         void use_development_card(ariel::Player &p, GameConsts::DevelopmentCard card);
         void GameCheck();
+        ~Catan();
     };
 }
