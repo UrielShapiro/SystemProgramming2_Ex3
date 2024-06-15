@@ -26,6 +26,10 @@ void ariel::Player::change_victory_points(const short amount)
     {
         throw std::invalid_argument("There's no way you got more then 2 victory points at once");
     }
+    if (this->victory_points + amount < 0)
+    {
+        throw std::invalid_argument("You cannot have negative victory points");
+    }
     this->victory_points += amount;
 }
 
@@ -34,24 +38,61 @@ short ariel::Player::get_victory_points() const
     return this->victory_points;
 }
 
-void ariel::Player::change_resource_amount(const GameConsts::MapValues resource, const size_t amount)
+void ariel::Player::change_resource_amount(const GameConsts::MapValues resource, const int amount)
 {
+    if (amount < 0) // Check if that amount can be removed
+    {
+        bool valid = false;
+        switch (resource)
+        {
+        case GameConsts::MapValues::FOREST:
+            valid = check_valid_resources(GameConsts::ResourceCard::Wood, 1);
+            break;
+        case GameConsts::MapValues::HILL:
+            valid = check_valid_resources(GameConsts::ResourceCard::Brick, 1);
+            break;
+        case GameConsts::MapValues::MOUNTAIN:
+            valid = check_valid_resources(GameConsts::ResourceCard::Ore, 1);
+            break;
+        case GameConsts::MapValues::FIELD:
+            valid = check_valid_resources(GameConsts::ResourceCard::Grain, 1);
+            break;
+        case GameConsts::MapValues::PASTURES:
+            valid = check_valid_resources(GameConsts::ResourceCard::Wool, 1);
+            break;
+        case GameConsts::MapValues::SEA:
+            break;
+        case GameConsts::MapValues::DESERT:
+            break;
+        default:
+            throw std::invalid_argument("Invalid resource type"); // Shouldn't be reached.
+        }
+        if (!valid)
+            throw std::runtime_error("Not enough of that resource to remove");
+    }
+
+    bool added_resource = false;
     switch (resource)
     {
     case GameConsts::MapValues::FOREST:
         this->wood_amount += amount;
+        added_resource = true;
         break;
     case GameConsts::MapValues::HILL:
         this->brick_amount += amount;
+        added_resource = true;
         break;
     case GameConsts::MapValues::MOUNTAIN:
         this->ore_amount += amount;
+        added_resource = true;
         break;
     case GameConsts::MapValues::FIELD:
         this->grain_amount += amount;
+        added_resource = true;
         break;
     case GameConsts::MapValues::PASTURES:
         this->wool_amount += amount;
+        added_resource = true;
         break;
     case GameConsts::MapValues::SEA:
         break;
@@ -60,10 +101,11 @@ void ariel::Player::change_resource_amount(const GameConsts::MapValues resource,
     default:
         throw std::invalid_argument("Invalid resource type"); // Shouldn't be reached.
     }
-    this->total_cards += amount;
+    if (added_resource) // If the map value correspond to a resource card (not desert or sea)
+        this->total_cards += amount;
 }
 
-void ariel::Player::change_resource_amount(const GameConsts::MapValues *resources_vec, const size_t amount)
+void ariel::Player::change_resource_amount(const GameConsts::MapValues *resources_vec, const int amount)
 {
     for (size_t i = 0; i < MAX_RESOURCES_PER_BUILDABLE; i++)
     {
@@ -71,8 +113,12 @@ void ariel::Player::change_resource_amount(const GameConsts::MapValues *resource
     }
 }
 
-void ariel::Player::change_resource_amount(const GameConsts::ResourceCard resource, const size_t amount)
+void ariel::Player::change_resource_amount(const GameConsts::ResourceCard resource, const int amount)
 {
+    if (amount < 0 && !check_valid_resources(resource, -amount))
+    {
+        throw std::runtime_error("Not enough of that resource to remove");
+    }
     switch (resource)
     {
     case GameConsts::ResourceCard::Wood:
@@ -358,47 +404,61 @@ void ariel::Player::set_largest_army(bool is_the_largest)
     }
 }
 
-template <typename T>
-bool ariel::Player::trade(ariel::Player &p, std::vector<T> &vec)
+/*
+ *  @param: p - the player to trade with
+ *  @param: vec - the vector of development cards to trade
+ *  @return: true if the trade was successful, false otherwise
+ *  Important: current player is getting cards from the other player (Player p).
+ */
+bool ariel::Player::trade(ariel::Player &p, std::vector<GameConsts::DevelopmentCard> &vec)
 {
-    bool traded = false;
-    for (T &item : vec)
+    if (p.get_development_cards().size() == 0)
     {
-        if (std::is_same<decltype(item), GameConsts::ResourceCard>::value) // Check if the type of the item is resource card
+        std::cerr << "Error while trading cards: " << p.get_name() << " does not have any development cards" << std::endl;
+        return false;
+    }
+
+    bool traded = false; // Will be returned for the tests
+    for (GameConsts::DevelopmentCard &item : vec)
+    {
+#ifdef DEBUG
+        std::cout << "Trading development card: " << to_string(item) << std::endl;
+#endif
+        bool found = false;
+        for (size_t i = 0; i < p.get_development_cards().size() && !found; i++)
         {
-            if (!(this->check_valid_resources(item, 1)))
+            if (to_string(p.get_development_cards().at(i)) == to_string(item))
             {
-                std::cout << this->get_name() << " does not have " << typeid(item).name() << std::endl;
-                continue;
-            }
-            else
-            {
-                this->change_resource_amount(item, -1);
-                p.change_resource_amount(item, 1);
+#ifdef DEBUG
+                std::cout << "Found a match between: " << to_string(p.get_development_cards().at(i)) << " and " << to_string(item) << std::endl;
+#endif
+                this->get_development_cards().push_back(item);
+                p.get_development_cards().erase(p.get_development_cards().begin() + i);
                 traded = true;
+                std::cout << this->get_name() << " was given " << to_string(this->get_development_cards().back()) << " card by " << p.get_name() << std::endl;
+                found = true;
             }
         }
-        else if (std::is_same<decltype(item), GameConsts::DevelopmentCard>::value)
+    }
+    return traded;
+}
+
+bool ariel::Player::trade(ariel::Player &p, std::vector<GameConsts::ResourceCard> &vec)
+{
+    bool traded = false; // Will be returned for the tests
+    for (GameConsts::ResourceCard &item : vec)
+    {
+        if (!(p.check_valid_resources(item, 1)))
         {
-            if (this->development_cards.size() == 0)
-            {
-                std::cerr << "Error while trading cards: " << this->get_name() << " does not have any development cards" << std::endl;
-                continue;
-            }
-            for (size_t i = 0; i < this->development_cards.size(); i++)
-            {
-                if (to_string(this->development_cards.at(i)) == to_string(item))
-                {
-                    this->development_cards.erase(this->development_cards.begin() + i);
-                    p.get_development_cards().push_back(item);
-                    traded = true;
-                    break;
-                }
-            }
+            std::cout << p.get_name() << " does not have " << to_string(item) << " to trade" << std::endl;
+            continue;
         }
         else
         {
-            throw std::runtime_error("Error: invalid type of trade");
+            p.change_resource_amount(item, -1);
+            this->change_resource_amount(item, 1);
+            traded = true;
+            std::cout << this->get_name() << " was given " << to_string(item) << " by " << p.get_name() << std::endl;
         }
     }
     return traded;
@@ -406,7 +466,9 @@ bool ariel::Player::trade(ariel::Player &p, std::vector<T> &vec)
 
 void ariel::Player::add_development_card(const GameConsts::DevelopmentCard card)
 {
+    // The game will take the resources from the player when he buys the card
     this->development_cards.push_back(card);
+    // total cards is not updated here becuase when the player needs to discard half of his cards only when he has more than 7 resource cards
 }
 
 size_t ariel::Player::get_total_cards() const
@@ -427,13 +489,14 @@ void ariel::Player::discard_half_cards()
 #ifdef DEBUG
     std::cout << "Discarding " << half << " cards" << std::endl;
 #endif
-    if (half == 0)
-    {
-        return;
-    }
+
     static std::random_device rd;  // random number generator
     static std::mt19937 gen(rd()); // seeder
-    std::vector<GameConsts::ResourceCard> resources_vec = {GameConsts::ResourceCard::Brick, GameConsts::ResourceCard::Grain, GameConsts::ResourceCard::Ore, GameConsts::ResourceCard::Wool, GameConsts::ResourceCard::Wood};
+    std::vector<GameConsts::ResourceCard> resources_vec = {GameConsts::ResourceCard::Brick,
+                                                           GameConsts::ResourceCard::Grain,
+                                                           GameConsts::ResourceCard::Ore,
+                                                           GameConsts::ResourceCard::Wool,
+                                                           GameConsts::ResourceCard::Wood};
     std::uniform_int_distribution<> dis(0, resources_vec.size() - 1); // Uniform distribution
 
     while (this->total_cards > half)
@@ -493,4 +556,9 @@ void ariel::Player::print_stats() const
         }
         std::cout << std::endl;
     }
+}
+
+bool ariel::Player::get_is_largest_army() const
+{
+    return this->largest_army;
 }

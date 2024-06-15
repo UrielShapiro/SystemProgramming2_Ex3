@@ -16,7 +16,7 @@ namespace ariel
     class Player
     {
     private:
-        static short ID; // Will top at 3
+        static short ID; // static variable to keep track of the number of players
         short my_id;
         std::string name;
         int wood_amount;
@@ -34,9 +34,9 @@ namespace ariel
         Player(const std::string player_name);
         ~Player();
         void change_victory_points(const short amount);
-        void change_resource_amount(const GameConsts::MapValues resource, const size_t amount);
-        void change_resource_amount(const GameConsts::MapValues* resources_vec, const size_t amount);
-        void change_resource_amount(const GameConsts::ResourceCard resource, const size_t amount);
+        void change_resource_amount(const GameConsts::MapValues resource, const int amount);
+        void change_resource_amount(const GameConsts::MapValues* resources_vec, const int amount);
+        void change_resource_amount(const GameConsts::ResourceCard resource, const int amount);
         short get_victory_points() const;
         int rollDice() const;
         void placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std::string building);
@@ -44,6 +44,7 @@ namespace ariel
         bool check_valid_resources(GameConsts::ResourceCard card, int amount) const;
         std::vector<GameConsts::DevelopmentCard> &get_development_cards(); // Is not const because it will be used to add cards to the vector
         void set_largest_army(bool is_the_largest);
+        bool get_is_largest_army() const;
 
         /*
          *   @param: edge_placement - the id of the edge
@@ -53,8 +54,8 @@ namespace ariel
         const std::string get_name() const;
         short get_id() const;
 
-        template <typename CardsType>
-        bool trade(ariel::Player &p, std::vector<CardsType> &vec); // Used template to create function for Development cards and for resource cards
+        bool trade(ariel::Player &p, std::vector<GameConsts::DevelopmentCard> &vec);
+        bool trade(ariel::Player &p, std::vector<GameConsts::ResourceCard> &vec);
 
         void add_development_card(const GameConsts::DevelopmentCard card);
         size_t get_total_cards() const;
