@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <random>
 
+// #define DEBUG
+
 ariel::Catan::Catan(ariel::Player &p1, ariel::Player &p2, ariel::Player &p3) : largest_army(INITIATE_LARGEST_ARMY), turn(0),
                                                                                board(ariel::Board::get_instance()), players{p1, p2, p3}
 {
@@ -31,7 +33,7 @@ void ariel::Catan::StartingGame(std::vector<size_t> &e_placement, std::vector<si
     }
 }
 
-void ariel::Catan::rollDice()
+int ariel::Catan::rollDice()
 {
     GameCheck(); // before rolling the dice, we need to check if the game has ended
     int dice_result = players[turn].rollDice();
@@ -46,7 +48,7 @@ void ariel::Catan::rollDice()
                 p.discard_half_cards();
             }
         }
-        return;
+        return dice_result;
     }
     for (ariel::Tile *t : board->get_tiles())
     {
@@ -65,6 +67,7 @@ void ariel::Catan::rollDice()
             }
         }
     }
+    return dice_result; // For the tests
 }
 
 GameConsts::DevelopmentCard ariel::Catan::buyDevelopmentCard(ariel::Player &p)
@@ -108,12 +111,22 @@ void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::Developmen
     if (card != GameConsts::DevelopmentCard::KNIGHT)
     {
         bool found = false;
+
+#ifdef DEBUG
+        std::cout << "Development cards vector size: " << p.get_development_cards().size() << std::endl;
+#endif
         for (size_t i = 0; i < p.get_development_cards().size() && !found; i++)
         {
+#ifdef DEBUG
+            std::cout << "Checking if " << to_string(p.get_development_cards().at(i)) << " is equal to " << to_string(card) << std::endl;
+#endif
             if (to_string(p.get_development_cards().at(i)) == to_string(card))
             {
                 p.get_development_cards().erase(p.get_development_cards().begin() + i);
                 found = true;
+                #ifdef DEBUG
+                std::cout << "Found the card" << std::endl;
+                #endif
             }
         }
         if (!found)
@@ -178,7 +191,6 @@ void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::Developmen
             p.change_resource_amount(GameConsts::ResourceCard::Brick, 1);
             p.change_resource_amount(GameConsts::ResourceCard::Wood, 1);
             p.placeRoad(*(this->board), *(this->board->get_edges().at(std::stoi(place1))));
-            std::cout << "Placed a road in position " << place1 << std::endl;
         }
         catch (const std::runtime_error &e)
         {
@@ -190,7 +202,6 @@ void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::Developmen
             p.change_resource_amount(GameConsts::ResourceCard::Brick, 1);
             p.change_resource_amount(GameConsts::ResourceCard::Wood, 1);
             p.placeRoad(*(this->board), *(this->board->get_edges().at(std::stoi(place2))));
-            std::cout << "Placed a road in position " << place2 << std::endl;
         }
         catch (const std::runtime_error &e)
         {
@@ -209,6 +220,7 @@ void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::Developmen
         GameConsts::ResourceCard resource_card1;
         GameConsts::ResourceCard resource_card2;
 
+        // First resource
         if (!user_ans1.compare("Ore") || !user_ans1.compare("ore"))
         {
             resource_card1 = GameConsts::ResourceCard::Ore;
@@ -230,6 +242,7 @@ void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::Developmen
             resource_card1 = GameConsts::ResourceCard::Grain;
         }
 
+        // Second resource
         if (!user_ans2.compare("Ore") || !user_ans2.compare("ore"))
         {
             resource_card2 = GameConsts::ResourceCard::Ore;
@@ -252,27 +265,37 @@ void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::Developmen
         }
 
         p.change_resource_amount(resource_card1, 1);
-        p.change_resource_amount(resource_card2, 2);
+        p.change_resource_amount(resource_card2, 1);
         std::cout << "Added " << GameConsts::to_string(resource_card1) << " and " << GameConsts::to_string(resource_card2) << " to " << p.get_name() << std::endl;
     }
+    if (card == GameConsts::DevelopmentCard::WINNING_POINTS)
+    {
+        p.change_victory_points(1);
+        std::cout << p.get_name() << " was added a victory point" << std::endl;
+    }
+    
 
     if (card == GameConsts::DevelopmentCard::KNIGHT)
     {
         if (ariel::Catan::check_largest_army())
         {
-            std::cout << players[turn].get_name() << " Has the largest army" << std::endl;
+            std::cout << players[turn].get_name() << " has the largest army" << std::endl;
             // Because check_largest_army() updates each dice roll, if it is updated now, it means that the player has the largest army
         }
     }
-    GameCheck();    // To move the turn to the next player
+    GameCheck(); // To move the turn to the next player
 }
 
 bool ariel::Catan::check_winner()
 {
     for (ariel::Player &p : players)
     {
+#ifdef DEBUG
+        std::cout << p.get_name() << " has " << p.get_victory_points() << " points" << std::endl;
+#endif
         if (p.get_victory_points() >= 10)
         {
+            std::cout << p.get_name() << " has reached " << p.get_victory_points() << " points and won the game!" << std::endl;
             return true;
         }
     }
@@ -318,16 +341,8 @@ ariel::Catan::~Catan()
 void ariel::Catan::GameCheck()
 {
     if (ariel::Catan::check_winner())
-    {
-        for (ariel::Player &p : players)
-        {
-            if (p.get_victory_points() >= 10)
-            {
-                std::cout << p.get_name() << " has reached " << p.get_victory_points() << " points and won the game!" << std::endl;
-                exit(0);
-            }
-        }
-    }
+        exit(0); // Exit the game
+
     check_largest_army();
     ++turn;
     turn = turn % MAX_NUM_OF_PLAYERS; // Move to the next player
