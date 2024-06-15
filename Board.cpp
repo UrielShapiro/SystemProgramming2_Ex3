@@ -210,38 +210,34 @@ bool ariel::Board::valid_settlement_placement(Vertex &v, Player &p)
 
     for (ariel::Tile *tile : this->tiles) // Finding all of the tiles that vertex is adjecent to
     {
-        if (std::find(tile->get_vertices().begin(), tile->get_vertices().end(), &v) != tile->get_vertices().end()) // If not found, an iterator to the end will be returned.
+        bool found = false;
+        for (size_t i = 0; i < VERTICES_PER_TILE && !found; i++)
         {
-            for (size_t i = 0; i < VERTICES_PER_TILE; i++)
+            if (tile->get_vertices().at(i)->get_id() == v.get_id())
             {
-                if (tile->get_vertices().at(i)->get_id() == v.get_id())
+                // Check if it's neighbour vertex has a village/city.
+                if (!(tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->is_free()))
                 {
-
-                    // Check if it's neighbour vertex has a village/city of other player
-                    if (!tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->is_free() &&
-                        tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->get_building()->get_owner().get_id() != p.get_id())
-                    {
-                        return false;
-                    }
-
-                    if (!tile->get_vertices().at(Utils::good_mod(i - 1, VERTICES_PER_TILE))->is_free() &&
-                        tile->get_vertices().at(Utils::good_mod(i - 1, VERTICES_PER_TILE))->get_building()->get_owner().get_id() != p.get_id())
-                    {
-                        return false;
-                    }
-
-                    // Check if theres a road to that vertex
-                    if (tile->get_edges().at(i)->isTaken() && tile->get_edges().at(i)->get_owner()->get_id() == p.get_id())
-                    {
-                        return true;
-                    }
-
-                    if (tile->get_edges().at(Utils::good_mod(i - 1, EDGES_PER_TILE))->isTaken() &&
-                        tile->get_edges().at(Utils::good_mod(i - 1, EDGES_PER_TILE))->get_owner()->get_id() == p.get_id())
-                    {
-                        return true;
-                    }
+                    return false;
                 }
+
+                if (!(tile->get_vertices().at(Utils::good_mod(i - 1, VERTICES_PER_TILE))->is_free()))
+                {
+                    return false;
+                }
+
+                // Check if theres a road to that vertex
+                if (tile->get_edges().at(i)->isTaken() && tile->get_edges().at(i)->get_owner()->get_id() == p.get_id())
+                {
+                    return true;
+                }
+
+                if (tile->get_edges().at(Utils::good_mod(i - 1, EDGES_PER_TILE))->isTaken() &&
+                    tile->get_edges().at(Utils::good_mod(i - 1, EDGES_PER_TILE))->get_owner()->get_id() == p.get_id())
+                {
+                    return true;
+                }
+                found = true;
             }
         }
     }
@@ -254,51 +250,31 @@ bool ariel::Board::valid_road_placement(Edge &e, Player &p)
     {
         return false;
     }
-    bool valid1 = false;
-    bool valid2 = false;
-    bool has_village = false;
+
     for (ariel::Tile *tile : this->tiles)
     {
-        if (std::find(tile->get_edges().begin(), tile->get_edges().end(), &e) != tile->get_edges().end()) // If not found, an iterator to the end will be returned.
+        bool found = false;
+        for (size_t i = 0; i < EDGES_PER_TILE && !found; i++)
         {
-            for (size_t i = 0; i < EDGES_PER_TILE; i++)
+            if (tile->get_edges().at(i)->get_id() == e.get_id())
             {
-                if (tile->get_edges().at(i)->get_id() == e.get_id())
-                {
-                    // Check the edge adjecent edges
-                    if (tile->get_edges().at(Utils::good_mod(i - 1, EDGES_PER_TILE))->get_owner() == nullptr) // If this place has no road yet
-                    {
-                        continue;
-                    }
-                    if (!(tile->get_edges().at(Utils::good_mod(i - 1, EDGES_PER_TILE))->get_owner()->get_id() == p.get_id())) // i - 1 might be a nagative number
-                        valid1 = true;
-
-                    if (tile->get_edges().at(Utils::good_mod(i + 1, EDGES_PER_TILE))->get_owner() == nullptr) // If this place has no road yet
-                    {
-                        continue;
-                    }
-                    if (!(tile->get_edges().at(Utils::good_mod(i + 1, EDGES_PER_TILE))->get_owner()->get_id() == p.get_id())) // i + 1 might be > EDGES_PER_TILE
-                        valid2 = true;
-
-                    // Checking if theres an adjecent village / city
-                    if (!tile->get_vertices().at(i)->is_free())
-                    {
-                        has_village = tile->get_vertices().at(i)->get_building()->get_owner().get_id() == p.get_id();
-                    }
-
-                    if (!tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->is_free())
-                    {
-                        has_village = tile->get_vertices().at(i)->get_building()->get_owner().get_id() == p.get_id();
-                    }
-
-                    break;
-                }
-                if (valid1 || valid2 || has_village)
-                {
+                // Check adjecent edges for a road of the same player
+                if (tile->get_edges().at(Utils::good_mod(i - 1, EDGES_PER_TILE))->isTaken() && tile->get_edges().at(Utils::good_mod(i - 1, EDGES_PER_TILE))->get_owner()->get_id() == p.get_id())
                     return true;
-                }
-                // Else: check other vertices who own that edge
+
+                if (tile->get_edges().at(Utils::good_mod(i + 1, EDGES_PER_TILE))->isTaken() && tile->get_edges().at(Utils::good_mod(i + 1, EDGES_PER_TILE))->get_owner()->get_id() == p.get_id())
+                    return true;
+
+                // Check adjecent vertices for a village/city of the same player
+                if (!tile->get_vertices().at(i)->is_free() && tile->get_vertices().at(i)->get_building()->get_owner().get_id() == p.get_id())
+                    return true;
+
+                if (!tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->is_free() && tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->get_building()->get_owner().get_id() == p.get_id())
+                    return true;
+
+                found = true;
             }
+            // Else: check other vertices who own that edge
         }
     }
     return false; // If there isn't a village on a vertex near that edge or it's adjecent edges does not have a road owned by that player
@@ -312,4 +288,9 @@ std::vector<ariel::Tile *> ariel::Board::get_tiles()
 std::vector<ariel::Edge *> ariel::Board::get_edges()
 {
     return this->edges;
+}
+
+std::vector<ariel::Vertex *> ariel::Board::get_vertices()
+{
+    return this->vertices;
 }
