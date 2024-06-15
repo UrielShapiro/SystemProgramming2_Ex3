@@ -42,6 +42,7 @@ int main()
     {
         catan.rollDice();
     }
+    
     try
     {
         catan.buyDevelopmentCard(catan.get_players()[2]);                                                          // p3 buys a development card.
