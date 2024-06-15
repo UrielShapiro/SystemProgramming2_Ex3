@@ -56,7 +56,7 @@ void ariel::Catan::rollDice()
             {
                 if (!v->is_free())
                 {
-                    size_t amount = v->get_building()->get_type() == "Village" ? 1 : 2;
+                    int amount = v->get_building()->get_type() == "Village" ? 1 : 2;
                     v->get_building()->get_owner().change_resource_amount(t->get_value(), amount);
 
                     std::cout << v->get_building()->get_owner().get_name() << " was awarded " << amount << " "
@@ -264,6 +264,7 @@ void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::Developmen
             // Because check_largest_army() updates each dice roll, if it is updated now, it means that the player has the largest army
         }
     }
+    GameCheck();    // To move the turn to the next player
 }
 
 bool ariel::Catan::check_winner()
