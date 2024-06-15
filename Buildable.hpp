@@ -18,7 +18,6 @@ namespace ariel
 
     public:
         Buildable(const Buildable &other);
-        virtual void get_resources(const size_t amount) = 0;
         virtual std::string get_type() const = 0;
         const GameConsts::MapValues *get_resources() const;
         Player &get_owner();
@@ -29,7 +28,6 @@ namespace ariel
     {
     public:
         Village(Player &p, const GameConsts::MapValues resources_list[MAX_RESOURCES_PER_BUILDABLE]);
-        void get_resources(const size_t amount) override;
         std::string get_type() const override;
     };
 
@@ -37,7 +35,6 @@ namespace ariel
     {
     public:
         City(Player &p, const GameConsts::MapValues resources_list[MAX_RESOURCES_PER_BUILDABLE]);
-        void get_resources(const size_t amount) override;
         std::string get_type() const override;
     };
 

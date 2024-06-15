@@ -28,24 +28,11 @@ ariel::Player &ariel::Buildable::get_owner()
 
 ariel::Village::Village(Player &p, const GameConsts::MapValues resources_list[MAX_RESOURCES_PER_BUILDABLE]) : Buildable(p, resources_list) {}
 
-void ariel::Village::get_resources(size_t amount)
-{
-    for (GameConsts::MapValues &resource : this->resources)
-    {
-        this->owner.change_resource_amount(resource, amount);
-    }
-}
+
 
 std::string ariel::Village::get_type() const { return "Village"; }
 
 ariel::City::City(Player &p, const GameConsts::MapValues resources_list[MAX_RESOURCES_PER_BUILDABLE]) : Buildable(p, resources_list) {}
 
-void ariel::City::get_resources(size_t amount)
-{
-    for (GameConsts::MapValues &resource : this->resources)
-    {
-        this->owner.change_resource_amount(resource, 2 * amount);
-    }
-}
 
 std::string ariel::City::get_type() const { return "City"; }
