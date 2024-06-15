@@ -2,18 +2,19 @@ CXX = g++
 CXXFLAGS = -Wall -Wextra -Werror -g
 VALGRIND_FLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes
 
-EXEC = Demo
+Test = Test
+demo = Demo
 
 SRCS = $(wildcard *.cpp)					# Get all the .cpp files in the current directory
-SRCS := $(filter-out $(EXEC).cpp, $(SRCS))	# Remove the main file from the list of sources
+SRCS := $(filter-out $(demo).cpp, $(SRCS))	# Remove the main file from the list of sources
+SRCS := $(filter-out $(Test).cpp, $(SRCS))	# Remove the main file from the list of sources
 
 OBJECTS = $(SRCS:.cpp=.o)
 
-demo = Demo
 
 all: $(demo)
 
-$(demo): $(OBJECTS) $(EXEC).cpp
+$(demo): $(OBJECTS) $(demo).cpp
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 # Compile
@@ -26,7 +27,11 @@ valgrind: $(demo)
 catan: $(demo)
 	./$(demo)
 
+$(Test): $(OBJECTS) $(Test).cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^
+	./$(Test)
+
 clean:
-	rm -f *.o $(demo)
+	rm -f *.o $(demo) $(Test)
 
 .PHONY: all clean valgrind catan
