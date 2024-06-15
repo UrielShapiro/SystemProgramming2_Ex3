@@ -20,7 +20,7 @@ namespace ariel
         Catan(ariel::Player &p1, ariel::Player &p2, ariel::Player &p3);
         Board *getBoard();
         void StartingGame(std::vector<size_t> &e_placement, std::vector<size_t> &v_placement);
-        void rollDice();
+        int rollDice();
         bool check_winner();
         bool check_largest_army();
         GameConsts::DevelopmentCard buyDevelopmentCard(Player &p);
