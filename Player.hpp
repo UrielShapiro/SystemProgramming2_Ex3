@@ -5,14 +5,13 @@
 #include <memory>
 #include "Vertex.hpp"
 #include "GameConsts.hpp"
-
-
+#define MAX_RESOURCES_PER_BUILDABLE 3
 namespace ariel
 {
-    class Board;    // Forward declaration
-    class Edge;     // Forward declaration
+    class Board;     // Forward declaration
+    class Edge;      // Forward declaration
     class Buildable; // Forward declaration
-    class Vertex;   // Forward declaration
+    class Vertex;    // Forward declaration
 
     class Player
     {
@@ -27,7 +26,7 @@ namespace ariel
         int wool_amount;
         size_t total_cards;
         short victory_points;
-        std::vector<ariel::Buildable*> buildings;
+        std::vector<ariel::Buildable *> buildings;
         std::vector<GameConsts::DevelopmentCard> development_cards;
         bool largest_army;
 
@@ -36,6 +35,7 @@ namespace ariel
         ~Player();
         void change_victory_points(const short amount);
         void change_resource_amount(const GameConsts::MapValues resource, const size_t amount);
+        void change_resource_amount(const GameConsts::MapValues* resources_vec, const size_t amount);
         void change_resource_amount(const GameConsts::ResourceCard resource, const size_t amount);
         short get_victory_points() const;
         int rollDice() const;
@@ -49,11 +49,16 @@ namespace ariel
          *   @param: edge_placement - the id of the edge
          *   @param: vertex_placement - 0 for for one side of the vertex and 1 for the other
          */
-        void game_start_placement(ariel::Board &b, size_t edge_placement, size_t vertex_placement);
+        void game_start_placement(ariel::Board &b, std::vector<size_t> &edge_placement, std::vector<size_t> &vertex_placement);
         const std::string get_name() const;
         short get_id() const;
 
         template <typename CardsType>
         bool trade(ariel::Player &p, std::vector<CardsType> &vec); // Used template to create function for Development cards and for resource cards
+
+        void add_development_card(const GameConsts::DevelopmentCard card);
+        size_t get_total_cards() const;
+        void discard_half_cards();
+        void print_stats() const;
     };
 };

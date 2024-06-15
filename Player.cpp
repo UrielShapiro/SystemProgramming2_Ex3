@@ -1,6 +1,10 @@
 #include "Player.hpp"
 #include <stdexcept>
 #include <ctime>
+#include <iostream>
+#include <random>
+
+// #define DEBUG
 
 short ariel::Player::ID = 0;
 
@@ -59,6 +63,14 @@ void ariel::Player::change_resource_amount(const GameConsts::MapValues resource,
     this->total_cards += amount;
 }
 
+void ariel::Player::change_resource_amount(const GameConsts::MapValues *resources_vec, const size_t amount)
+{
+    for (size_t i = 0; i < MAX_RESOURCES_PER_BUILDABLE; i++)
+    {
+        change_resource_amount(resources_vec[i], amount);
+    }
+}
+
 void ariel::Player::change_resource_amount(const GameConsts::ResourceCard resource, const size_t amount)
 {
     switch (resource)
@@ -86,10 +98,15 @@ void ariel::Player::change_resource_amount(const GameConsts::ResourceCard resour
 
 int ariel::Player::rollDice() const
 {
-    srand(time(NULL));
-    int dice1 = ((rand() % 6) + 1);
-    srand(time(NULL));
-    int dice2 = ((rand() % 6) + 1);
+    // Random number generator - https://en.cppreference.com/w/cpp/numeric/random
+    // Using this instead of rand() + srand() because it's true random
+
+    static std::random_device rd;              // random number generator
+    static std::mt19937 gen(rd());             // seeder
+    std::uniform_int_distribution<> dis(1, 6); // Uniform distribution for dice rolls (1 to 6)
+
+    int dice1 = dis(gen);
+    int dice2 = dis(gen);
     return dice1 + dice2;
 }
 
@@ -107,7 +124,7 @@ void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std
 {
     if (!b.valid_settlement_placement(v, *this))
     {
-        throw std::invalid_argument("This vertex is already taken");
+        throw std::invalid_argument("You cannot place a settlement here!");
     }
 
     if (building.compare("Village") == 0)
@@ -116,9 +133,21 @@ void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std
         {
             return;
         }
-        if (brick_amount - 1 < 0 || wood_amount - 1 < 0 || wool_amount - 1 < 0 || grain_amount - 1 < 0) // Check if the amount of resources is valid
+        if (!check_valid_resources(GameConsts::ResourceCard::Brick, 1) ||
+            !check_valid_resources(GameConsts::ResourceCard::Wood, 1) ||
+            !check_valid_resources(GameConsts::ResourceCard::Wool, 1) ||
+            !check_valid_resources(GameConsts::ResourceCard::Grain, 1)) // Check if the amount of resources is valid
         {
             throw std::runtime_error("Invalid amount of resources to build a village!");
+        }
+
+        std::vector<GameConsts::ResourceCard> cost = {GameConsts::ResourceCard::Brick,
+                                                      GameConsts::ResourceCard::Wood,
+                                                      GameConsts::ResourceCard::Wool,
+                                                      GameConsts::ResourceCard::Grain};
+        for (GameConsts::ResourceCard resource_card : cost)
+        {
+            this->change_resource_amount(resource_card, -1);
         }
 
         this->change_victory_points(1);
@@ -132,10 +161,13 @@ void ariel::Player::placeSettelemnt(ariel::Board &b, ariel::Vertex &v, const std
         {
             throw std::runtime_error("You cannot build a city from scratch");
         }
-        if (ore_amount - 3 < 0 || grain_amount - 2 < 0) // Check if the amount of resources is valid
+        if (!check_valid_resources(GameConsts::ResourceCard::Ore, 3) ||
+            !check_valid_resources(GameConsts::ResourceCard::Grain, 2)) // Check if the amount of resources is valid
         {
             throw std::runtime_error("Invalid amount of resources to build a city!");
         }
+        this->change_resource_amount(GameConsts::ResourceCard::Ore, -3);
+        this->change_resource_amount(GameConsts::ResourceCard::Grain, -2);
 
         this->change_victory_points(1);
         ariel::City *city = new ariel::City(*this, v.get_resources());
@@ -152,36 +184,54 @@ void ariel::Player::placeRoad(ariel::Board &b, ariel::Edge &e)
 {
     if (!b.valid_road_placement(e, *this))
     {
-        throw std::runtime_error("This edge is already taken!");
+        throw std::runtime_error("You cannot place a road here!");
     }
-    if (wood_amount - 1 < 0 || brick_amount - 1 < 0)
+#ifdef DEBUG
+    std::cout << "Checking if the player has enough resources to build a road" << std::endl;
+    std::cout << "Wood: " << wood_amount << " Brick: " << brick_amount << std::endl;
+#endif
+    if (!check_valid_resources(GameConsts::ResourceCard::Wood, 1) ||
+        !check_valid_resources(GameConsts::ResourceCard::Brick, 1))
     {
         throw std::runtime_error("Invalid amount of resources to build a road!");
     }
+    change_resource_amount(GameConsts::ResourceCard::Brick, -1);
+    change_resource_amount(GameConsts::ResourceCard::Wood, -1);
     e.set_road(*this);
+    std::cout << this->name << " has set a road on edge: " << e.get_id() << std::endl;
 }
 
-void ariel::Player::game_start_placement(ariel::Board &b, size_t edge_placement, size_t vertex_placement)
+void ariel::Player::game_start_placement(ariel::Board &b, std::vector<size_t> &edge_placement, std::vector<size_t> &vertex_placement)
 {
-    if (edge_placement > NUM_OF_EDGES)
+    if (edge_placement.size() != 2 || vertex_placement.size() != 2)
     {
-        throw std::domain_error("Error: you have entered a number above the limit\n");
+        throw std::invalid_argument("Error: you have entered the wrong amount of placements\n");
     }
-    if (b.get_edges().at(edge_placement)->isTaken())
+    for (size_t e : edge_placement)
     {
-        std::string error = "Error:" + std::to_string(b.get_edges().at(edge_placement)->get_id()) + " is already taken\n";
+        if (e > NUM_OF_EDGES)
+        {
+            throw std::domain_error("Error: you have entered a number above the limit\n");
+        }
+    }
+
+    // First placement
+    if (b.get_edges().at(edge_placement[0])->isTaken())
+    {
+        std::string error = "Error:" + std::to_string(b.get_edges().at(edge_placement[0])->get_id()) + " is already taken\n";
         throw std::runtime_error(error.c_str());
     }
-    b.get_edges().at(edge_placement)->set_road(*this);
-    std::cout << this->name << " has set an edge on: " << edge_placement << std::endl;
+    b.get_edges().at(edge_placement[0])->set_road(*this);
+    std::cout << this->name << " has set a road on edge: " << edge_placement[0] << std::endl;
 
+    bool found = false;
     for (ariel::Tile *tile : b.get_tiles())
     {
-        for (size_t i = 0; i < EDGES_PER_TILE; i++)
+        for (size_t i = 0; i < EDGES_PER_TILE && !found; i++)
         {
-            if (tile->get_edges().at(i)->get_id() == b.get_edges().at(edge_placement)->get_id())
+            if (tile->get_edges().at(i)->get_id() == b.get_edges().at(edge_placement[0])->get_id())
             {
-                size_t choice = vertex_placement % 2;   // To make it sort of boolean
+                size_t choice = vertex_placement[0] % 2; // To make it sort of boolean
                 switch (choice)
                 {
                 case 0:
@@ -189,24 +239,73 @@ void ariel::Player::game_start_placement(ariel::Board &b, size_t edge_placement,
                     const GameConsts::MapValues *v_resouces(tile->get_vertices().at(i)->get_resources());
                     this->buildings.push_back(new ariel::Village(*this, v_resouces));
                     tile->get_vertices().at(i)->set_building(this->buildings.back());
+                    this->change_resource_amount(v_resouces, 1);
                     std::cout << this->name << " has set a village on vertex: " << tile->get_vertices().at(i)->get_id() << std::endl;
                 }
-                break;
+                    found = true;
+                    break;
                 case 1:
                 {
-                    const GameConsts::MapValues *v_resouces(tile->get_vertices().at(i + 1)->get_resources());
+                    const GameConsts::MapValues *v_resouces(tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->get_resources());
                     this->buildings.push_back(new ariel::Village(*this, v_resouces));
                     tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->set_building(this->buildings.back());
+                    this->change_resource_amount(v_resouces, 1);
                     std::cout << this->name << " has set a village on vertex: " << tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->get_id() << std::endl;
                 }
-                break;
+                    found = true;
+                    break;
                 default:
                     throw std::runtime_error("An error occured while trying to set a building on a vertex");
                 }
             }
         }
     }
-    this->change_victory_points(1); // Awarding a victory point for the first settlement
+
+    // Second placement
+    if (b.get_edges().at(edge_placement[1])->isTaken())
+    {
+        std::string error = "Error:" + std::to_string(b.get_edges().at(edge_placement[1])->get_id()) + " is already taken\n";
+        throw std::runtime_error(error.c_str());
+    }
+    b.get_edges().at(edge_placement[1])->set_road(*this);
+    std::cout << this->name << " has set an edge on: " << edge_placement[1] << std::endl;
+    bool found2 = false;
+    for (ariel::Tile *tile : b.get_tiles())
+    {
+        for (size_t i = 0; i < EDGES_PER_TILE && !found2; i++)
+        {
+            if (tile->get_edges().at(i)->get_id() == b.get_edges().at(edge_placement[1])->get_id())
+            {
+                size_t choice = vertex_placement[1] % 2; // To make it sort of boolean
+                switch (choice)
+                {
+                case 0:
+                { // Open perentheses to use v_resources again in the next case
+                    const GameConsts::MapValues *v_resouces(tile->get_vertices().at(i)->get_resources());
+                    this->buildings.push_back(new ariel::Village(*this, v_resouces));
+                    tile->get_vertices().at(i)->set_building(this->buildings.back());
+                    this->change_resource_amount(v_resouces, 1);
+                    std::cout << this->name << " has set a village on vertex: " << tile->get_vertices().at(i)->get_id() << std::endl;
+                }
+                    found2 = true;
+                    break;
+                case 1:
+                {
+                    const GameConsts::MapValues *v_resouces(tile->get_vertices().at(i + 1)->get_resources());
+                    this->buildings.push_back(new ariel::Village(*this, v_resouces));
+                    tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->set_building(this->buildings.back());
+                    this->change_resource_amount(v_resouces, 1);
+                    std::cout << this->name << " has set a village on vertex: " << tile->get_vertices().at(Utils::good_mod(i + 1, VERTICES_PER_TILE))->get_id() << std::endl;
+                }
+                    found2 = true;
+                    break;
+                default:
+                    throw std::runtime_error("An error occured while trying to set a building on a vertex");
+                }
+            }
+        }
+    }
+    this->change_victory_points(2); // Awarding a victory point for the first settlement
 }
 
 bool ariel::Player::check_valid_resources(GameConsts::ResourceCard card, int amount) const
@@ -249,11 +348,13 @@ void ariel::Player::set_largest_army(bool is_the_largest)
     else if (this->largest_army && !is_the_largest) // Was the largest but isnt anymore
     {
         this->change_victory_points(-2);
+        std::cout << this->name << " no longer has the largest army" << std::endl;
     }
     this->largest_army = is_the_largest;
     if (this->largest_army) // If is the new largest army
     {
         this->change_victory_points(2);
+        std::cout << this->name << " now has the largest army" << std::endl;
     }
 }
 
@@ -263,7 +364,7 @@ bool ariel::Player::trade(ariel::Player &p, std::vector<T> &vec)
     bool traded = false;
     for (T &item : vec)
     {
-        if (std::is_same<decltype(item), GameConsts::ResourceCard>::value)  // Check if the type of the item is resource card
+        if (std::is_same<decltype(item), GameConsts::ResourceCard>::value) // Check if the type of the item is resource card
         {
             if (!(this->check_valid_resources(item, 1)))
             {
@@ -301,4 +402,95 @@ bool ariel::Player::trade(ariel::Player &p, std::vector<T> &vec)
         }
     }
     return traded;
+}
+
+void ariel::Player::add_development_card(const GameConsts::DevelopmentCard card)
+{
+    this->development_cards.push_back(card);
+}
+
+size_t ariel::Player::get_total_cards() const
+{
+    return this->total_cards;
+}
+
+void ariel::Player::discard_half_cards()
+{
+#ifdef DEBUG
+    std::cout << this->name << " has too many cards, discarding half of them" << std::endl;
+#endif
+    if (this->total_cards <= 7) // If the player has less or equal to 7 cards, he doesn't need to discard
+    {
+        return;
+    }
+    size_t half = this->total_cards / 2;
+#ifdef DEBUG
+    std::cout << "Discarding " << half << " cards" << std::endl;
+#endif
+    if (half == 0)
+    {
+        return;
+    }
+    static std::random_device rd;  // random number generator
+    static std::mt19937 gen(rd()); // seeder
+    std::vector<GameConsts::ResourceCard> resources_vec = {GameConsts::ResourceCard::Brick, GameConsts::ResourceCard::Grain, GameConsts::ResourceCard::Ore, GameConsts::ResourceCard::Wool, GameConsts::ResourceCard::Wood};
+    std::uniform_int_distribution<> dis(0, resources_vec.size() - 1); // Uniform distribution
+
+    while (this->total_cards > half)
+    {
+        GameConsts::ResourceCard card = resources_vec.at(dis(gen));
+#ifdef DEBUG
+        std::cout << "Discarding card: " << to_string(card) << std::endl;
+        std::cout << "Total cards: " << this->total_cards << std::endl;
+#endif
+        switch (card)
+        {
+        case GameConsts::ResourceCard::Brick:
+            if (check_valid_resources(GameConsts::ResourceCard::Brick, 1))
+                change_resource_amount(GameConsts::ResourceCard::Brick, -1);
+            break;
+        case GameConsts::ResourceCard::Grain:
+            if (check_valid_resources(GameConsts::ResourceCard::Grain, 1))
+                change_resource_amount(GameConsts::ResourceCard::Grain, -1);
+            break;
+        case GameConsts::ResourceCard::Ore:
+            if (check_valid_resources(GameConsts::ResourceCard::Ore, 1))
+                change_resource_amount(GameConsts::ResourceCard::Ore, -1);
+            break;
+        case GameConsts::ResourceCard::Wool:
+            if (check_valid_resources(GameConsts::ResourceCard::Wool, 1))
+                change_resource_amount(GameConsts::ResourceCard::Wool, -1);
+            break;
+        case GameConsts::ResourceCard::Wood:
+            if (check_valid_resources(GameConsts::ResourceCard::Wood, 1))
+                change_resource_amount(GameConsts::ResourceCard::Wood, -1);
+            break;
+        default:
+            throw std::runtime_error("Error: invalid resource card");
+        }
+    }
+}
+
+void ariel::Player::print_stats() const
+{
+    std::cout << "------------------------------------------" << std::endl;
+    std::cout << this->name << " has the following resources:" << std::endl;
+    std::cout << "Wood:\t" << this->wood_amount << std::endl;
+    std::cout << "Brick:\t" << this->brick_amount << std::endl;
+    std::cout << "Ore:\t" << this->ore_amount << std::endl;
+    std::cout << "Grain:\t" << this->grain_amount << std::endl;
+    std::cout << "Wool:\t" << this->wool_amount << std::endl;
+    std::cout << "Total cards:\t" << this->total_cards << std::endl;
+    std::cout << "Victory points:\t" << this->victory_points << std::endl;
+    std::string has_largest_army = this->largest_army ? "True" : "False";
+    std::cout << "Largest army:\t" << has_largest_army << std::endl;
+    if (development_cards.size() > 0)
+    {
+        std::cout << "Development cards: ";
+        for (GameConsts::DevelopmentCard card : this->development_cards)
+        {
+            std::cout << to_string(card) << " ";
+        }
+        std::cout << std::endl;
+    }
 }
