@@ -31,6 +31,7 @@ namespace ariel
         bool valid_road_placement(Edge &e, Player &p);
         std::vector<ariel::Tile*> get_tiles();
         std::vector<ariel::Edge*> get_edges();
+        std::vector<ariel::Vertex*> get_vertices();
         ~Board();
     };
 }
