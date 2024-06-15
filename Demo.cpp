@@ -11,6 +11,8 @@
 using namespace std;
 using namespace ariel;
 
+#define NUM_OF_TURNS MAX_NUM_OF_PLAYERS * 5
+
 int main()
 {
     Player p1("Amit");
@@ -18,7 +20,51 @@ int main()
     Player p3("Dana");
     Catan catan(p1, p2, p3);
 
-    std::cout << "Compiled successfully" << std::endl;
+    Board *board = catan.getBoard(); // get the board of the game.
+
+    std::vector<size_t> e_placement = {26, 18, 13, 55, 58, 52};
+    std::vector<size_t> v_placement = {1, 0, 1, 1, 0, 1};
+
+    catan.StartingGame(e_placement, v_placement); // Will place the initial buildings and roads for the players.
+
+    catan.print_players_stats();
+    std::cout << "------------------------------------------" << std::endl;
+    catan.rollDice();
+    try
+    {
+        catan.get_players()[1].placeRoad(*board, *(board->get_edges().at(14))); // p1 builds a road.
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "\033[0;31m" << e.what() << "\033[0m" << '\n';
+    }
+    for (int i = 0; i < NUM_OF_TURNS + 1; i++) // Simulate the game for NUM_OF_TURNS turns to make the players get resources.
+    {
+        catan.rollDice();
+    }
+    try
+    {
+        catan.buyDevelopmentCard(catan.get_players()[2]);                                                          // p3 buys a development card.
+        catan.use_development_card(catan.get_players()[2], catan.get_players()[2].get_development_cards().back()); // p3 uses the development card.
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "\033[0;31m" << e.what() << "\033[0m" << '\n';
+    }
+    catan.rollDice();
+
+    try
+    {
+        catan.get_players()[0].placeSettelemnt(*board, *(board->get_vertices().at(4)), "City"); // p1 builds a city on vertex 4.
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "\033[0;31m" << e.what() << "\033[0m" << '\n';
+    }
+
+    catan.print_players_stats();
+    std::cout << "------------------------------------------" << std::endl;
+
     // // Starting of the game. Every player places two settlements and two roads.
     // catan.ChooseStartingPlayer();   // should print the name of the starting player, assume it is Amit.
     // Board* board = catan.getBoard(); // get the board of the game.
@@ -90,4 +136,5 @@ int main()
     // p3.printPoints(); // p3 has 2 points because it has two settelments.
 
     // catan.printWinner(); // Should print None because no player reached 10 points.
+    return 0;
 }
