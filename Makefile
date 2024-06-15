@@ -23,7 +23,10 @@ $(demo): $(OBJECTS) $(EXEC).cpp
 valgrind: $(demo)
 	valgrind $(VALGRIND_FLAGS) ./$(demo)
 
+catan: $(demo)
+	./$(demo)
+
 clean:
 	rm -f *.o $(demo)
 
-.PHONY: all clean valgrind
+.PHONY: all clean valgrind catan
