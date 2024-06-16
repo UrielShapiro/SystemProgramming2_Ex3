@@ -39,7 +39,7 @@ int main()
 
     catan.StartingGame(e_placement, v_placement);
 
-    while (!catan.GameCheck())
+    do
     {
         std::cout << "It's " << catan.get_players()[catan.get_turn()].get_name() << "'s turn!" << std::endl;
         catan.rollDice(); // Will print the result
@@ -323,13 +323,13 @@ int main()
                 catan.print_players_stats();
                 break;
             case 7:
-                valid_ans = true;   // End turn
+                valid_ans = true; // End turn
                 break;
             default:
                 std::cerr << "Invalid input, please try again" << std::endl;
                 break;
             }
         }
-    }
+    } while (!catan.GameCheck());
     return 0;
 }
