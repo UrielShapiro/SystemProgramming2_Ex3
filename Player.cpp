@@ -285,7 +285,7 @@ void ariel::Player::game_start_placement(ariel::Board &b, std::vector<size_t> &e
                     const GameConsts::MapValues *v_resouces(tile->get_vertices().at(i)->get_resources());
                     this->buildings.push_back(new ariel::Village(*this, v_resouces));
                     tile->get_vertices().at(i)->set_building(this->buildings.back());
-                    this->change_resource_amount(v_resouces, 1);
+                    this->change_resource_amount(v_resouces, 1);    // Award the player with the resources of the vertex
                     std::cout << this->name << " has set a village on vertex: " << tile->get_vertices().at(i)->get_id() << std::endl;
                 }
                     found = true;
