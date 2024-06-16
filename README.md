@@ -1,29 +1,212 @@
-# קטאן - מחלקות וירושה
-המתיישבים של קטאן הוא משחק קופסא ל-3 עד 4 שחקנים המשלב הן חשיבה אסטרטגית, ניהול משאבים ויכולת מסחר. מטרת המשחק היא לצבור ראשון 10 נקודות ניצחון.
-את הוראות המשחק המלא ניתן למצוא כאן: https://www.hakubia.com/wp-content/uploads/2021/01/%D7%A7%D7%98%D7%90%D7%9F.pdf.
-במטלה אתם תממשו גרסה פשוטה יותר של המשחק עבור 3 שחקנים.
-## חוקי המשחק
-המשחק מורכב מלוח המכיל 19 חלקות אדמה מוקפות בים. כל חלקת אדמה נותנת משאב כלשהו (חוץ מהמדבר). חלקות האדמה במשחק הן: יער (מניב עץ), גבעות (מניבות לבנים), אדמת מרעה (מניבה צמר), אדמה חקלאית (מניבה שיבולת), הרים (מניבים ברזל), מדבר (לא מניב כלום).
-כל חלקי המפה מקבלים מספר כלשהו בין 2 ל-12. 
-### קלפים, יישובים, ערים ומשאבים
-כל שחקן בעל משאבים (כגון שיבולת, ברזל, לבנים וכו') יכול לרכוש איתם דברים שונים במשחק כמו קלפי פיתוח, יישובים, ערים ודרכים.
-- קלף פיתוח: מחירו של קלף פיתוח הוא ברזל 1, צמר 1 ושיבולת 1. השחקן יכול לקבל אחד מ-3 סוגים שונים של קלפים: 1. קלף קידום: זהו קלף המעניק הטבה לשחקן (לאחר מכן הקלף נעלם). בין הקלפים הללו ניתן למצוא: מונופול - השחקן בוחר משאב כלשהו וכל שאר השחקנים מחוייבים להעביר לו את המשאב הזה. בניית דרכים - השחקן יכול לבנות 2 דרכים במפה ללא עלות. שנת שפע - השחקן זוכה לקבל מהבנק שני קלפים של משאבים לבחירה ולהשתמש בהם באותו התור. 2. אבירים - שחקן המחזיק ב-3 קלפים כאלה, מקבל את קלף הצבא הגדול ביותר המקנה לו 2 נקודות ניצחון (אם איבד אביר אחד, הקלף נלקח מהשחקן. שימו לב שיש בדיוק 3 קלפים כאלה!). 3. קלפי נקודות ניצחון - יש 4 קלפים שונים המעניקים נקודת ניצחון למי שמחזיק בהם.
-- בנייה: ניתן לבנות דרכים, ערים ויישובים בצורה הבאה: 1. קטע דרך: עלותו לבנים 1 ועץ 1. קטע דרך יכול להיות מחובר רק ליישוב (או עיר) בבעלות השחקן או לקטע דרך נוסף. 2. יישוב: עלות היישוב היא לבנה 1, עץ 1, צמר 1 ושיבולת 1. ניתן לבנות יישוב על צומת שאליה מובילה דרך אחת לפחות ומברחק של 2 קטעי דרך מיישוב אחר. בניית יישוב מקנה לשחקן נקודת ניצחון אחת. 3. עיר: עיר יכולה להחליף יישוב קיים. עלות הבנייה היא ברזל 3 ושיבולת 2. ברגע שמשדרגים יישוב לעיר, השחקן מאבד את הנקודה של היישוב ומקבל 2 נקודות על הבנייה. עיר מעניקה לשחקן פי-2 יותר משאבים מכל חבלי הארץ הסמוכים לה.
-- משאבים: כאמור, המשאבים מתקבלים מחבלי הארץ השונים. כאשר שחקן מטיל את קוביות המשחק, כל השחקנים מקבלים משאבים בהתאם למספר שיצא בהטלה (כלומר אם יצא 3 בהטלה, אז שחקנים עם יישובים/ערים הגובלים עם חבלי ארץ בעלי אותו מספר זוכים במשאב).
-- מסחר: שחקנים יכולים לבצע מסחר ביניהם (כלומר להחליף קלפים או משאבים) בהתאם לאיך שהם קובעים.
-### מהלך המשחק
-כל שחקן מתחיל את המשחק עם 2 יישובים ו-2 קטעי דרך המעניקים לו 2 נקודות ניצחון. בנוסף, השחקנים מקבלים משאבים התחלתיים בהתאם למקומות שבהם הם מיקמו את היישובים (משאב אחד מכל משאב אפשרי).
-סדר המשחק נקבע באופן שרירותי (לשיקולכם). בכל תור השחקנים מטילים 2 קוביות. בהתאם לתוצאת ההטלה, השחקנים מקבלים משאבים כמו שפורט מקודם.
-שחקן בתור נתון עושה את הפעולות הבאות לפי הסדר (לאחר הטלת הקוביות):
-- הוא יכול לסחור (כלומר להחליף קלפים או משאבים).
-- הוא יכול לבנות דרכים, יישובים או ערים ויכול לקנות קלפי פיתוח.
-  אם השחקן מנצל את אחד מקלפי הפיתוח שברשותו, התור אוטומטית עובר לשחקן הבא (השחקן יכול לנצל את קלף הפיתוח עוד לפני הטלת הקוביות, במקרה כזה התור עובר לשחקן הבא).
-  אם סכום ההטלה הוא 7, על כל השחקנים בעלי יותר מ-7 קלפי משאבים לבחור מחצית מהקלפים ולהחזיר אותם לערימה.
-  ### סיום המשחק
-  המשחק מסתיים בתור שבו אחד השחקנים הגיע ל-10 או יותר נקודות ניצחון. כדי לנצח במשחק, השחקן צריך שיגיע תורו ובאותו התור יהיו לו 10 נקודות לכל הפחות.
+# Presentor details:
+- Name: Uriel Shapiro
+- Last digits of ID: 9745
+- Email: uriel1999@gmail.com
 
 
-שימו לב - במטלה הזאת אתם לא מקבלים קבצים לדוגמה מלבד הדמו. עליכם לחשוב לבד על הלוגיקה של המשחק ולממש את החוקים (כמובן שאתם יכולים לממש לפי ראות עיניכם אבל עם הסבר). במטלה הזאת אתם תיבחנו גם על יצירתיות. נסו לבנות את לוח המשחק בצורה שתתאים למשחק המקורי (חשבו איך לממש דבר כזה, אולי להוסיף עוד מחלקות?). כמו כן, **חובה** לצרף בדיקות יחידה למטלה הזאת. הסיבה היא פשוטה - המטלה מורכבת מאוד ואתם נדרשים לבדוק את הקוד שלכם. 
+# Catan Game Documentation
 
-יש להוסיף קובץ Makefile כאשר הפקודה ``` make catan ``` מריצה את התוכנית הראשית שלכם (המדגימה סיבוב אחד במשחק). עליכם להגיש קובץ ```README``` המסביר את המימוש שלכם (כלומר מהם חוקי המשחק שהגדרתם), ההיררכיה של המחלקות ובאילו ספריות השתמשתם. עליכם גם לתאר את כל השיטות שכתבתם, ולכתוב תוכנית ```main``` המריצה סיבוב תקין של המשחק. כמו כן, עליכם לכתוב בתחילת כל קובץ את המייל שלכם. אי עמידה בהנחיות תגרור הפחתה בציון. 
-בהצלחה!
+This document provides a brief description of each function within the `Catan` game:
+
+To make the demo executable run:
+```bash
+make Demo
+```
+
+To make and run the test executable, run:
+```bash
+make Test
+```
+
+To make the main game, run:
+```bash
+make Game
+```
+
+### Game logic:
+The Catan class manages the overall gameplay for a game of Catan. It initializes the game with players, controls the game board, and handles the main game mechanics such as rolling dice, buying and using development cards, and placing initial game pieces. It also tracks game progress, checks for victory conditions, and maintains player statistics and turns. The class ensures the correct execution of game rules and provides the necessary interactions between players and the game board.
+
+## Catan Class
+
+### Constructor
+- Initializes a new game instance with three players. Prints a message indicating the start of the game and the starting player.
+
+### `getBoard`
+- Returns a pointer to the shared `Board` instance used in the game.
+
+### `StartingGame`
+- Starts the game by placing roads and villages based on the provided placements for each player. Throws an error if the input sizes are incorrect.
+
+### `rollDice`
+- Rolls the dice for the current player, checks for special conditions (like rolling a 7, which triggers card discarding), and distributes resources accordingly.
+
+### `buyDevelopmentCard`
+- Allows the current player to purchase a development card if they have sufficient resources. Resources are deducted, and a random card is added to the player's collection.
+
+### `use_development_card`
+- Enables the use of a purchased development card by the current player. The effect of the card depends on its type, such as building roads, taking resources from other players, etc.
+
+### `check_winner`
+- Checks if any player has reached the victory point threshold (10 points). If so, declares the winner and returns `true`.
+
+### `check_largest_army`
+- Determines if the current player has the largest army based on the number of Knight cards. Updates the largest army requirement if necessary.
+
+### `GameCheck`
+- Performs a check to see if the game has ended due to a win condition or reaching the largest army requirement. Moves to the next player if not ended.
+
+### `print_players_stats`
+- Prints statistics for all players involved in the game.
+
+### `get_players`
+- Returns a pointer to the array of `Player` objects participating in the game.
+
+### `get_turn`
+- Returns the index of the current player's turn.
+
+### Destructor (`~Catan`)
+- Cleans up by deleting the dynamically allocated `Board` object.
+
+## Player Class
+
+### Constructor
+
+Initializes a new `Player` object with the specified player name and sets default values for various attributes such as ID, resource amounts, cards, victory points, and building status.
+
+
+### Destructor
+
+Responsible for cleaning up dynamically allocated `Buildable` objects stored in the `buildings` vector to prevent memory leaks.
+
+
+### `change_victory_points`
+
+Adjusts the player's victory points by a specified amount, incorporating validation to ensure victory points do not exceed 2 per turn and remain non-negative. Throws an exception for invalid operations.
+
+
+### `get_victory_points`
+
+Retrieves the current number of victory points held by the player.
+
+
+### `rollDice`
+
+Simulates rolling two six-sided dice and returns the sum, providing a mechanism for generating random numbers in gameplay scenarios.
+
+
+### `get_name`
+
+Retrieves the player's name, facilitating identification within the game.
+
+
+### `get_id`
+
+Obtains the unique identifier assigned to the player, useful for tracking and referencing players.
+
+
+### `placeSettlement`
+
+Places a settlement or village/city on the game board, requiring specific resources and validating placement against game rules.
+
+
+### `placeRoad`
+
+Constructs a road connecting two vertices on the game board, checking for valid placement and sufficient resources.
+
+
+### `game_start_placement`
+
+Performs initial placements of roads and settlements at the start of the game, based on the provided placements.
+
+### `check_valid_resources`
+
+Checks if the player has enough of a specified resource.
+
+### `get_development_cards`
+
+Returns a reference to the vector containing the player's development cards.
+Notice that it is changeable.
+
+### `set_largest_army`
+
+Updates the player's status regarding having the largest army, adjusting victory points accordingly.
+
+### `rollDice`
+
+Simulates rolling two six-sided dice and returns the sum of the results.
+
+### `get_name`
+
+Returns the player's name.
+
+### `get_id`
+
+Returns the unique identifier of the player.
+
+### `trade - DevelopmentCard`
+Allows the current player to trade a set of development cards with another player (`p`). The current player receives cards from the other player.
+Returns `true` if the trade was successful, `false` otherwise.
+
+### `trade - ResourceCard`
+
+Enables the current player to trade a set of resource cards with another player (`p`). The current player receives cards from the other player.
+Returns `true` if the trade was successful, `false` otherwise.
+
+### `get_total_cards`
+
+Returns the total number of cards (resource and development) currently held by the player.
+
+### `discard_half_cards`
+
+Discards half of the player's cards if the total number of cards exceeds 7. This action is part of the game's rules when a dice roll result is 7.
+
+###  `print_stats`
+
+Prints detailed statistics about the current player, including resources, total cards, victory points, and whether the player has the largest army.
+
+### `get_is_largest_army`
+
+Checks if the current player has the largest army in the game.
+
+
+##  Board Class
+
+### Constructor
+
+- Initializes the board by creating instances of `Edge`, `Vertex`, and `Tile`.
+- Uses a singleton pattern to ensure only one instance of the `Board` exists.
+- Iterates through predefined constants to create vertices representing different types of terrain (sea, mountain, pastures, hill, forest, field, desert).
+- Creates edges between these vertices to form the basic structure of the map.
+- Groups these vertices and edges into tiles, each representing a section of the map with specific properties.
+
+### Destructor
+
+- Cleans up dynamically allocated memory for vertices, edges, and tiles to prevent memory leaks.
+- Resets the `instance` pointer to `nullptr`.
+
+### Singleton Pattern (`get_instance()`)
+
+- Ensures that only one instance of the `Board` class exists throughout the application.
+- Returns the existing instance if it exists; otherwise, creates a new instance.
+
+  
+### `valid_settlement_placement`
+
+- Checks if a settlement can be placed on a given vertex based on adjacency rules:
+- The vertex must be adjacent to another vertex with a building of the same player.
+- There must be a road connecting the vertex to a neighboring vertex with a building of the same player.
+
+### `valid_road_placement`
+
+- Validates the placement of a road on a given edge:
+  - The edge must not already be taken.
+  - The road must connect two vertices, either both with buildings of the same player or one with a building and the other with a road of the same player.
+
+### Getter Methods
+
+- `get_tiles()`: Returns a vector of pointers to all `Tile` objects on the board.
+- `get_edges()`: Returns a vector of pointers to all `Edge` objects on the board.
+- `get_vertices()`: Returns a vector of pointers to all `Vertex` objects on the board.
+
+
+
