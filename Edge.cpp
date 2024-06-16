@@ -1,3 +1,9 @@
+/**
+ * @ID: 9745
+ * @name: Uriel Shapiro
+ * @email: uriel1999@gmail.com
+ */
+
 #include "Edge.hpp"
 
 ariel::Edge::Edge(const short id) : road_owner(NULL), is_taken(false), ID(id) {}

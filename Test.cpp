@@ -1,3 +1,9 @@
+/**
+ * @ID: 9745
+ * @name: Uriel Shapiro
+ * @email: uriel1999@gmail.com
+ */
+
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 #include "Catan.hpp"

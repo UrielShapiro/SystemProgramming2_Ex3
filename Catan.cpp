@@ -1,3 +1,9 @@
+/**
+ * @ID: 9745
+ * @name: Uriel Shapiro
+ * @email: uriel1999@gmail.com
+ */
+
 #include "Catan.hpp"
 #include <time.h>
 #include <iostream>

@@ -1,3 +1,7 @@
+# @ID: 9745
+# @name: Uriel Shapiro
+# @email: uriel1999@gmail.com
+
 CXX = g++
 CXXFLAGS = -Wall -Wextra -Werror -g
 VALGRIND_FLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes

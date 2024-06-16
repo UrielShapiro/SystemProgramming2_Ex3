@@ -1,3 +1,9 @@
+/**
+ * @ID: 9745
+ * @name: Uriel Shapiro
+ * @email: uriel1999@gmail.com
+ */
+
 #include "Vertex.hpp"
 
 ariel::Vertex::Vertex(const GameConsts::MapValues resource1, const GameConsts::MapValues resource2,

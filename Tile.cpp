@@ -1,3 +1,9 @@
+/**
+ * @ID: 9745
+ * @name: Uriel Shapiro
+ * @email: uriel1999@gmail.com
+ */
+
 #include "Tile.hpp"
 
 ariel::Tile::Tile(short id, short token, GameConsts::MapValues v,
