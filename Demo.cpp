@@ -27,9 +27,18 @@ int main()
 
     catan.StartingGame(e_placement, v_placement); // Will place the initial buildings and roads for the players.
 
-    catan.print_players_stats();
-    std::cout << "------------------------------------------" << std::endl;
     catan.rollDice();
+    try
+    {
+        std::vector<GameConsts::ResourceCard> resources_vec = {GameConsts::ResourceCard::Wool, GameConsts::ResourceCard::Wool};
+        catan.get_players()[0].trade(catan.get_players()[2], resources_vec);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    catan.GameCheck();  // Would change the turn to the next player.
+
     try
     {
         catan.get_players()[1].placeRoad(*board, *(board->get_edges().at(14))); // p1 builds a road.
@@ -38,7 +47,8 @@ int main()
     {
         std::cerr << "\033[0;31m" << e.what() << "\033[0m" << '\n';
     }
-    for (int i = 0; i < NUM_OF_TURNS + 1; i++) // Simulate the game for NUM_OF_TURNS turns to make the players get resources.
+
+    for (int i = 0; i < NUM_OF_TURNS; i++) // Simulate the game for NUM_OF_TURNS turns to make the players get resources.
     {
         catan.rollDice();
     }
