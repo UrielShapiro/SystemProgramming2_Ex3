@@ -41,7 +41,7 @@ namespace ariel
         ~Player();
         void change_victory_points(const short amount);
         void change_resource_amount(const GameConsts::MapValues resource, const int amount);
-        void change_resource_amount(const GameConsts::MapValues* resources_vec, const int amount);
+        void change_resource_amount(const GameConsts::MapValues *resources_vec, const int amount);
         void change_resource_amount(const GameConsts::ResourceCard resource, const int amount);
         short get_victory_points() const;
         int rollDice() const;
