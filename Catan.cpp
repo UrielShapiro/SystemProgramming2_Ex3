@@ -41,7 +41,6 @@ void ariel::Catan::StartingGame(std::vector<size_t> &e_placement, std::vector<si
 
 int ariel::Catan::rollDice()
 {
-    GameCheck(); // before rolling the dice, we need to check if the game has ended
     int dice_result = players[turn].rollDice();
     std::cout << players[turn].get_name() << " rolled the dice. The result is: " << dice_result << std::endl;
     if (dice_result == 7)
