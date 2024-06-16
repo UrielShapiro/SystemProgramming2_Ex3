@@ -50,9 +50,10 @@ int main()
         std::cerr << "\033[0;31m" << e.what() << "\033[0m" << '\n';
     }
 
-    for (int i = 0; i < NUM_OF_TURNS; i++) // Simulate the game for NUM_OF_TURNS turns to make the players get resources.
+    for (int i = 0; i < NUM_OF_TURNS + 1; i++) // Simulate the game for NUM_OF_TURNS turns to make the players get resources.
     {
         catan.rollDice();
+        catan.GameCheck();
     }
     
     try
