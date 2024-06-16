@@ -25,9 +25,10 @@ namespace ariel
         bool check_largest_army();
         GameConsts::DevelopmentCard buyDevelopmentCard(Player &p);
         void use_development_card(ariel::Player &p, GameConsts::DevelopmentCard card);
-        void GameCheck();
+        bool GameCheck();
         void print_players_stats();
         ariel::Player *get_players();
+        size_t get_turn() const;
         ~Catan();
     };
 }

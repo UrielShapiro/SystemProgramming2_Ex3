@@ -60,9 +60,32 @@ int ariel::Catan::rollDice()
                 {
                     int amount = v->get_building()->get_type() == "Village" ? 1 : 2;
                     v->get_building()->get_owner().change_resource_amount(t->get_value(), amount);
+                    GameConsts::ResourceCard card_name;
+                    switch (t->get_value())
+                    {
+                    case GameConsts::MapValues::FOREST:
+                        card_name = GameConsts::ResourceCard::Wood;
+                        break;
+                    case GameConsts::MapValues::HILL:
+                        card_name = GameConsts::ResourceCard::Brick;
+                        break;
+                    case GameConsts::MapValues::MOUNTAIN:
+                        card_name = GameConsts::ResourceCard::Ore;
+                        break;
+                    case GameConsts::MapValues::FIELD:
+                        card_name = GameConsts::ResourceCard::Grain;
+                        break;
+                    case GameConsts::MapValues::PASTURES:
+                        card_name = GameConsts::ResourceCard::Wool;
+                        break;
+                    case GameConsts::MapValues::DESERT:
+                        break;
+                    case GameConsts::MapValues::SEA:
+                        break;
+                    }
 
                     std::cout << v->get_building()->get_owner().get_name() << " was awarded " << amount << " "
-                              << GameConsts::to_string(t->get_value()) << " cards" << std::endl;
+                              << GameConsts::to_string(card_name) << " card" << std::endl;
                 }
             }
         }
@@ -124,9 +147,9 @@ void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::Developmen
             {
                 p.get_development_cards().erase(p.get_development_cards().begin() + i);
                 found = true;
-                #ifdef DEBUG
+#ifdef DEBUG
                 std::cout << "Found the card" << std::endl;
-                #endif
+#endif
             }
         }
         if (!found)
@@ -273,7 +296,6 @@ void ariel::Catan::use_development_card(ariel::Player &p, GameConsts::Developmen
         p.change_victory_points(1);
         std::cout << p.get_name() << " was added a victory point" << std::endl;
     }
-    
 
     if (card == GameConsts::DevelopmentCard::KNIGHT)
     {
@@ -336,16 +358,17 @@ ariel::Catan::~Catan()
 }
 
 /*
-    This function will check if the game has ended, if not, it will move to the next player.
+    This function will return true if the game has ended, if not, it will move to the next player and return false.
 */
-void ariel::Catan::GameCheck()
+bool ariel::Catan::GameCheck()
 {
     if (ariel::Catan::check_winner())
-        exit(0); // Exit the game
+        return true;
 
     check_largest_army();
     ++turn;
     turn = turn % MAX_NUM_OF_PLAYERS; // Move to the next player
+    return false;
 }
 
 void ariel::Catan::print_players_stats()
@@ -359,4 +382,9 @@ void ariel::Catan::print_players_stats()
 ariel::Player *ariel::Catan::get_players()
 {
     return this->players;
+}
+
+size_t ariel::Catan::get_turn() const
+{
+    return this->turn;
 }
